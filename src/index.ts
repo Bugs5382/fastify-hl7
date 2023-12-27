@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
-import { CreateClient, CreateServer } from './classes.js'
+import { CreateBatch, CreateClient, CreateFileBatch, CreateMessage, CreateServer } from './classes.js'
 import { FastifyHL7Options } from './decorate.js'
 import { errors } from './errors.js'
 export * from './types.js'
@@ -21,7 +21,10 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
     fastify,
     opts,
     {
+      CreateBatch,
       CreateClient,
+      CreateFileBatch,
+      CreateMessage,
       CreateServer
     })
 })
