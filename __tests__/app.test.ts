@@ -41,6 +41,28 @@ describe('fastify-hl7 sample app tests', () => {
 
       await IB.close()
     })
-  })
 
+    test('...start server, connect with client', async () => {
+      await app.register(fastifyHL7)
+
+      const server = new app.hl7.CreateServer()
+
+      const IB = server.createInbound({ port: LISTEN_PORT }, async () => {})
+
+      await expectEvent(IB, 'listen')
+
+      const usedCheck = await tcpPortUsed.check(LISTEN_PORT, '0.0.0.0')
+
+      expect(usedCheck).toBe(true)
+
+      const client = new app.hl7.CreateClient({ host: '0.0.0.0' })
+
+      const OB = client.createOutbound({ port: LISTEN_PORT }, async () => {})
+
+      await expectEvent(OB, 'connect')
+
+      await OB.close()
+      await IB.close()
+    })
+  })
 })

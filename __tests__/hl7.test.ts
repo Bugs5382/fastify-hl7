@@ -37,5 +37,4 @@ describe('plugin fastify-hl7 tests', () => {
       expect(app.hl7).toHaveProperty('CreateServer')
     })
   })
-
 })
