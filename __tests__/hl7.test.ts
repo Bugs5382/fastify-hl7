@@ -1,4 +1,5 @@
-import fastify, {FastifyInstance} from 'fastify'
+import fastify, { FastifyInstance } from 'fastify'
+import fastifyHL7 from '../src'
 
 let app: FastifyInstance
 
@@ -11,23 +12,34 @@ afterEach(async () => {
 })
 
 describe('plugin fastify-hl7 tests', () => {
-
   describe('registration tests', () => {
+    test('....successful', async () => {
+      await app.register(fastifyHL7)
+    })
 
-    test.todo('....placeholder')
+    test('....successful - loglevel - debug', async () => {
+      await app.register(fastifyHL7, {
+        logLevel: 'debug'
+      })
+    })
 
+    test('....successful - loglevel - trace', async () => {
+      await app.register(fastifyHL7, {
+        logLevel: 'trace'
+      })
+    })
   })
 
   describe('sanity checks', () => {
-
-    test.todo('....placeholder')
-
+    test('ensure basic properties are accessible', async () => {
+      await app.register(fastifyHL7)
+      expect(app.hl7).toHaveProperty('client')
+      expect(app.hl7).toHaveProperty('builder')
+      expect(app.hl7).toHaveProperty('server')
+    })
   })
 
   describe('common action tests', () => {
-
     test.todo('....placeholder')
-
   })
-
 })
