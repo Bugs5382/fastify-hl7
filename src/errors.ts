@@ -1,11 +1,6 @@
 import createError from '@fastify/error'
 
 export const errors = {
-  /** Error if there is an invalid option used during registration. */
-  FASTIFY_HL7_ERR_INVALID_OPTS: createError(
-    'FASTIFY_HL7_ERR_INVALID_OPTS',
-    'Invalid options: %s'
-  ),
   /** Error if there is an setup error of the plugin itself. */
   FASTIFY_HL7_ERR_SETUP_ERRORS: createError(
     'FASTIFY_HL7_ERR_SETUP_ERRORS',

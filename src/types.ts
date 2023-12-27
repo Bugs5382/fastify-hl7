@@ -1,23 +1,10 @@
-import { HL7Functions } from 'fastify'
+import { HL7Classes } from 'fastify'
 import Client, { ClientOptions } from 'node-hl7-client'
 import Server, { ServerOptions } from 'node-hl7-server'
 
 declare module 'fastify' {
 
-  interface HL7Functions {
-    // /** Builder
-    //  * @since 1.0.0 */
-    // builder: {
-    //   /** Batch Instance
-    //    * @since 1.0.0 */
-    //   batch: () => Batch
-    //   /** File Batch Instance
-    //    * @since 1.0.0 */
-    //   fileBatch: () => FileBatch
-    //   /** Message Instance
-    //    * @since 1.0.0 */
-    //   message: () => Message
-    // }
+  interface HL7Classes {
     /** Client Class
      * @since 1.0.0 */
     CreateClient: new (props?: ClientOptions) => Client
@@ -28,13 +15,13 @@ declare module 'fastify' {
 
   export interface FastifyInstance {
     /** Main Decorator for Fastify **/
-    hl7: HL7Functions
+    hl7: HL7Classes & fastifyHL7.fastifyHL7NO
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace fastifyHL7 {
   export interface fastifyHL7NO {
-    [namespace: string]: HL7Functions
+    [namespace: string]: HL7Classes
   }
 }
