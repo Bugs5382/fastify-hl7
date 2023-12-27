@@ -1,29 +1,29 @@
 import { HL7Functions } from 'fastify'
-import { Batch, Client, FileBatch, Message } from 'node-hl7-client'
-import { Server } from 'node-hl7-server'
+import Client, { ClientOptions } from 'node-hl7-client'
+import Server, { ServerOptions } from 'node-hl7-server'
 
 declare module 'fastify' {
 
   interface HL7Functions {
-    /** Builder
-     * @since 1.0.0 */
-    builder: {
-      /** Batch Instance
-       * @since 1.0.0 */
-      batch: Batch
-      /** File Batch Instance
-       * @since 1.0.0 */
-      fileBatch: FileBatch
-      /** Message Instance
-       * @since 1.0.0 */
-      message: Message
-    }
+    // /** Builder
+    //  * @since 1.0.0 */
+    // builder: {
+    //   /** Batch Instance
+    //    * @since 1.0.0 */
+    //   batch: () => Batch
+    //   /** File Batch Instance
+    //    * @since 1.0.0 */
+    //   fileBatch: () => FileBatch
+    //   /** Message Instance
+    //    * @since 1.0.0 */
+    //   message: () => Message
+    // }
     /** Client Class
      * @since 1.0.0 */
-    client: Client
+    CreateClient: new (props?: ClientOptions) => Client
     /** Server Class
      * @since 1.0.0 */
-    server: Server
+    CreateServer: new (props?: ServerOptions) => Server
   }
 
   export interface FastifyInstance {

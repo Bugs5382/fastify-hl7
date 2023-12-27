@@ -33,13 +33,9 @@ describe('plugin fastify-hl7 tests', () => {
   describe('sanity checks', () => {
     test('ensure basic properties are accessible', async () => {
       await app.register(fastifyHL7)
-      expect(app.hl7).toHaveProperty('client')
-      expect(app.hl7).toHaveProperty('builder')
-      expect(app.hl7).toHaveProperty('server')
+      expect(app.hl7).toHaveProperty('CreateClient')
+      expect(app.hl7).toHaveProperty('CreateServer')
     })
   })
 
-  describe('common action tests', () => {
-    test.todo('....placeholder')
-  })
 })

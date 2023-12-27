@@ -1,7 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
-import { Client, Message, FileBatch, Batch } from 'node-hl7-client'
-import { Server } from 'node-hl7-server'
+import { CreateClient, CreateServer } from './classes.js'
 import { FastifyHL7Options } from './decorate.js'
 import { errors } from './errors.js'
 import { validateOpts } from './validation.js'
@@ -50,9 +49,8 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
     fastify,
     opts,
     {
-      client: Client,
-      builder: { batch: Batch, fileBatch: FileBatch, message: Message },
-      server: Server
+      CreateClient,
+      CreateServer
     })
 })
 
