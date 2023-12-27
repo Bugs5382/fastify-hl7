@@ -2,28 +2,30 @@
   "name": "fastify-hl7",
   "version": "0.0.0-development",
   "description": "A Fastify HL7 Plugin Developed in Pure TypeScript.",
-  "module": "./dist/esm/index.js",
-  "main": "./dist/cjs/index.js",
-  "types": "./dist/types/index.d.ts",
-  "release": {
-    "branches": [
-      "main"
-    ]
-  },
+  "module": "./lib/esm/index.js",
+  "main": "./lib/cjs/index.js",
+  "types": "./lib/types/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "default": "./dist/cjs/index.js"
+      "types": "./lib/types/index.d.ts",
+      "import": "./lib/esm/index.js",
+      "require": "./lib/cjs/index.js",
+      "default": "./lib/cjs/index.js"
     }
   },
+  "files": [
+    "lib/"
+  ],
+  "engines": {
+    "node": "^18 || ^20"
+  },
   "scripts": {
-    "clean": "rm -rf dist coverage",
-    "build": "tsc && tsc -p tsconfig.cjs.json && tsc -p tsconfig.types.json && ./bin/build-types.sh",
-    "build:watch": "tsc -w",
-    "lint": "ts-standard --parser @typescript-eslint/parser | snazzy",
-    "lint:fix": "ts-standard --fix --parser @typescript-eslint/parser | snazzy",
+    "clean": "rm -rf lib coverage",
+    "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && tsc -p tsconfig.types.json && ./bin/build-types.sh",
+    "build:watch": "tsc -p tsconfig.esm.json -w",
+    "npmPkgJsonLint": "npmPkgJsonLint .",
+    "lint": "npmPkgJsonLint . && ts-standard | snazzy",
+    "lint:fix": "npmPkgJsonLint . && ts-standard --fix | snazzy",
     "pack": "npm pack",
     "prepublishOnly": "npm run clean && npm run build && npm run test:ci && npm run pack",
     "test": "jest",
@@ -35,18 +37,20 @@
     "semantic-release": "semantic-release",
     "semantic-release:dry-run": "semantic-release --dry-run",
     "update": "npx npm-check-updates -u && npm run update:post-update",
-    "update:greatest": "npx npm-check-updates --target greatest",
-    "update:minor": "npx npm-check-updates --target minor -u && npm run update:post-update",
-    "update:newest": "npx npm-check-updates --target newest",
-    "update:patch": "npx npm-check-updates --target patch",
-    "update:semver": "npx npm-check-updates --target semver",
     "update:post-update": "npm install && npm run test:ci"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Bugs5382/fastify-hl7.git"
   },
-  "author": "",
+  "keywords": [
+    "node-hl7-client",
+    "node-hl7-server",
+    "hl7",
+    "fastify",
+    "fastify-plugin"
+  ],
+  "author": "Shane Froebel",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Bugs5382/fastify-hl7/issues"
@@ -68,10 +72,12 @@
     "@types/node": "^20.10.5",
     "@types/randomstring": "^1.1.11",
     "@typescript-eslint/parser": "^6.15.0",
+    "clean-publish": "^4.2.0",
     "fastify": "^4.25.1",
     "jest": "^29.7.0",
     "jest-ts-webcompat-resolver": "^1.0.0",
     "npm-check-updates": "^16.14.12",
+    "npm-package-json-lint": "^7.1.0",
     "pre-commit": "^1.2.2",
     "semantic-release": "^22.0.12",
     "snazzy": "^9.0.0",
