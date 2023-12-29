@@ -93,10 +93,22 @@ await client.sendMessage(message)
 
 ### This Library Options
 
+### `enableServer`
+
+If this is not set, enableServer will be set to ```true```. You need to set this to ```false``` will turn off the server capabilities.
+
+
+### ```serverOptions```
+
+Set this using the options from the [node-hl7-serer](https://github.com/Bugs5382/node-hl7-server/blob/main/README.md) library ServerOptions values to override server creation.
+This could be enabling IPv4 or IPv6 and other server options including TLS. SInce you can not set this after run time, it has to be set during registration.
+
+
+
 ### External Libraries
 
-* [node-hl7-client](https://github.com/Bugs5382/node-hl7-client/blob/main/README.md) - For the Client, Parser, and Builder.
-* [node-hl7-server](https://github.com/Bugs5382/node-hl7-server/blob/main/README.md) - For the Server.
+* [node-hl7-client](https://github.com/Bugs5382/node-hl7-client/blob/main/README.md) - For the Client, Parser, and Builder to review their options that can be passed as props.
+* [node-hl7-server](https://github.com/Bugs5382/node-hl7-server/blob/main/README.md) - For the Server to the options that can be passed as props.
 
 Please review the library for more complete documentation.
 A far as this plugin for Fastify, there are no options to pass.
