@@ -133,6 +133,16 @@ describe('plugin fastify-hl7 tests', () => {
         await app.register(fastifyHL7, { enableServer: false })
       })
 
+      test('...buildBatch -- must e a message type', async () => {
+
+        try {
+          app.hl7.buildBatch({ text: "BHS"})
+        } catch (err) {
+          expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('Use processMessage method. This is for building.'))
+        }
+
+      })
+
       test('...buildMessage -- with text', async () => {
 
         try {

@@ -32,6 +32,7 @@
     "test:open": "jest --detectOpenHandles",
     "test:ci": "jest --ci",
     "test:coverage": "jest --coverage",
+    "test:coverage:watch": "jest --coverage --watch",
     "typedoc": "typedoc",
     "typedoc:watch": "typedoc -watch",
     "semantic-release": "semantic-release",

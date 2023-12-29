@@ -1,6 +1,13 @@
 import { FastifyInstance, HL7 } from 'fastify'
 import fp from 'fastify-plugin'
-import { Batch, ClientBuilderMessageOptions, FileBatch, Message } from 'node-hl7-client'
+import {
+  Batch,
+  ClientBuilderFileOptions,
+  ClientBuilderMessageOptions,
+  ClientBuilderOptions,
+  FileBatch,
+  Message
+} from 'node-hl7-client'
 import Server, { HL7Inbound, InboundHandler, ListenerOptions } from 'node-hl7-server'
 import { HL7Client, HL7Server } from './class.js'
 import { FastifyHL7Options } from './decorate.js'
@@ -58,7 +65,13 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
     fastify,
     opts, {
       _serverInstance: serverInstance,
-      buildMessage: function (props: ClientBuilderMessageOptions): Message {
+      buildBatch: function (props: ClientBuilderOptions | undefined): Batch {
+        return client.buildBatch(props);
+      },
+      buildFileBatch: function (props: ClientBuilderFileOptions | undefined): FileBatch {
+        return client.buildFileBatch(props);
+      },
+      buildMessage: function (props: ClientBuilderMessageOptions | undefined): Message {
         return client.buildMessage(props)
       },
       closeServer: async function (port: string): Promise<boolean> {

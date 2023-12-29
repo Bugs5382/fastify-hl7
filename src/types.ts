@@ -1,7 +1,7 @@
 import Server, { HL7Inbound, InboundHandler, ListenerOptions } from 'node-hl7-server'
 import {
-  Batch,
-  ClientBuilderMessageOptions,
+  Batch, ClientBuilderFileOptions,
+  ClientBuilderMessageOptions, ClientBuilderOptions,
   ClientListenerOptions,
   ClientOptions, FileBatch,
   HL7Outbound,
@@ -15,7 +15,11 @@ declare module 'fastify' {
     /** Server Instance **/
     _serverInstance?: Server
     /** */
-    buildMessage: (props: ClientBuilderMessageOptions) => Message
+    buildBatch: (props?: ClientBuilderOptions) => Batch
+    /** */
+    buildFileBatch: (props?: ClientBuilderFileOptions) => FileBatch
+    /** */
+    buildMessage: (props?: ClientBuilderMessageOptions) => Message
     /** */
     closeServer: (port: string) => Promise<boolean>
     /** */

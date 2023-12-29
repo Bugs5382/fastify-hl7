@@ -1,6 +1,6 @@
 import Client, {
-  Batch,
-  ClientBuilderMessageOptions,
+  Batch, ClientBuilderFileOptions,
+  ClientBuilderMessageOptions, ClientBuilderOptions,
   ClientListenerOptions,
   ClientOptions, FileBatch,
   HL7Outbound, isBatch,
@@ -68,14 +68,41 @@ export class HL7Client {
     this._clientConnections = []
   }
 
+
+  /**
+   * Build a HL7 Batch
+   * @description Create a properly formatted HL7 Batch.
+   * @since 1.0.0
+   * @param props
+   */
+  buildBatch (props?: ClientBuilderOptions): Batch {
+    if (typeof props !== 'undefined' && typeof props.text !== 'undefined') {
+      throw new errors.FASTIFY_HL7_ERR_USAGE('Use processMessage method. This is for building.')
+    }
+    return new Batch({ ...props })
+  }
+
+  /**
+   * Build a HL7 File Batch
+   * @description Create a properly formatted HL7 File Batch.
+   * @since 1.0.0
+   * @param props
+   */
+  buildFileBatch (props?: ClientBuilderFileOptions): FileBatch {
+    if (typeof props !== 'undefined' && (typeof props.fullFilePath !== 'undefined' || typeof props.fileBuffer !== 'undefined')) {
+      throw new errors.FASTIFY_HL7_ERR_USAGE('Use readFile or readFileBuffer method. This is for building.')
+    }
+    return new FileBatch({ ...props })
+  }
+
   /**
    * Build a HL7 Message
    * @description Create a properly formatted HL7 message.
    * @since 1.0.0
    * @param props
    */
-  buildMessage (props: ClientBuilderMessageOptions): Message {
-    if (typeof props.text !== 'undefined') {
+  buildMessage (props?: ClientBuilderMessageOptions): Message {
+    if (typeof props !== 'undefined' && typeof props.text !== 'undefined') {
       throw new errors.FASTIFY_HL7_ERR_USAGE('Use processMessage method. This is for building.')
     }
     return new Message({ ...props })
