@@ -86,7 +86,7 @@ export class HL7Client {
    * @param name
    * @param props
    */
-  createClient (name: string, props: ClientOptions | undefined): void {
+  createClient (name: string, props: ClientOptions): void {
     const nameFormat = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/ //eslint-disable-line
     if (nameFormat.test(name)) {
       throw new errors.FASTIFY_HL7_ERR_USAGE('name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};\':"\\\\|,.<>\\/?~.')
@@ -127,7 +127,7 @@ export class HL7Client {
       return outbound
     }
 
-    throw new errors.FASTIFY_HL7_ERR_USAGE('Improper setup of a outbound connection.')
+    throw new errors.FASTIFY_HL7_ERR_USAGE('No valid client. Improper setup of a outbound connection.')
   }
 
   /**
