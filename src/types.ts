@@ -1,5 +1,12 @@
 import Server from 'node-hl7-server'
-import { ClientListenerOptions, ClientOptions, HL7Outbound, OutboundHandler } from 'node-hl7-client'
+import {
+  ClientBuilderMessageOptions,
+  ClientListenerOptions,
+  ClientOptions,
+  HL7Outbound,
+  Message,
+  OutboundHandler
+} from 'node-hl7-client'
 import { AHL7Inbound, AHL7Outbound } from './decorate.js'
 
 declare module 'fastify' {
@@ -7,6 +14,8 @@ declare module 'fastify' {
   export interface HL7 {
     /** Server Instance **/
     _serverInstance?: Server
+    /** */
+    buildMessage: (props: ClientBuilderMessageOptions) => Message
     /** Create Client */
     createClient: (name: string, props?: ClientOptions) => void
     /** Create Outgoing Client Port */
@@ -15,6 +24,8 @@ declare module 'fastify' {
     inbound?: AHL7Inbound[]
     /** An array of outbound connections. */
     outbound?: AHL7Outbound[]
+    /** */
+    processMessage: (text: string) => Message
   }
 
   export interface FastifyInstance {

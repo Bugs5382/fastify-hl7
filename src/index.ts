@@ -1,5 +1,6 @@
 import { FastifyInstance, HL7 } from 'fastify'
 import fp from 'fastify-plugin'
+import {ClientBuilderMessageOptions, Message} from "node-hl7-client";
 import Server from 'node-hl7-server'
 import { HL7Clients } from './class.js'
 import { FastifyHL7Options } from './decorate.js'
@@ -42,13 +43,19 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
   decorateFastifyInstance(
     fastify,
     opts, {
+      _serverInstance: server,
+      buildMessage(props: ClientBuilderMessageOptions): Message {
+        return client.buildMessage(props)
+      },
       createClient: function (name, props) {
         client.createClient(name, props)
       },
       createOutbound: function (name, props, handler) {
         return client.createOutbound(name, props, handler)
       },
-      _serverInstance: server
+      processMessage(text: string): Message {
+        return client.processMessage(text)
+      }
     })
 })
 

@@ -1,16 +1,21 @@
-import Client, { ClientListenerOptions, ClientOptions, HL7Outbound, OutboundHandler } from 'node-hl7-client'
-import EventEmitter from 'node:events'
+import Client, {
+  ClientBuilderMessageOptions,
+  ClientListenerOptions,
+  ClientOptions,
+  HL7Outbound,
+  Message,
+  OutboundHandler
+} from 'node-hl7-client'
 import { AClientPorts, AClients } from './decorate.js'
 import { errors } from './errors.js'
 
-export class HL7Clients extends EventEmitter {
+export class HL7Clients {
   /** @internal */
   private readonly _clientConnections: AClients[]
   /** @internal */
   _clientPorts: AClientPorts[]
 
   constructor () {
-    super()
     this._clientConnections = []
     this._clientPorts = []
   }
@@ -26,7 +31,6 @@ export class HL7Clients extends EventEmitter {
       name,
       client
     })
-    this.emit('client.create', name)
   }
 
   /**
@@ -49,4 +53,24 @@ export class HL7Clients extends EventEmitter {
     }
     throw new errors.FASTIFY_HL7_ERR_USAGE('Improper setup of a outbound connection.')
   }
+
+  /**
+   * @since 1.0.0
+   * @param text Raw HL& String
+   */
+  processMessage(text: string): Message {
+    return new Message({text})
+  }
+
+  /**
+   * @since 1.0.0
+   * @param props
+   */
+  buildMessage(props: ClientBuilderMessageOptions): Message {
+    if (typeof props.text !== 'undefined') {
+      throw new errors.FASTIFY_HL7_ERR_USAGE('Use processMessage method. This is for building.')
+    }
+    return new Message({...props})
+  }
+
 }
