@@ -2,7 +2,9 @@ import fastify, { FastifyInstance } from 'fastify'
 import fs from "fs";
 import {Batch, Message} from "node-hl7-client";
 import path from "path";
+import tcpPortUsed from 'tcp-port-used'
 import fastifyHL7 from '../src'
+import {expectEvent} from "./__utils__/utils";
 
 let app: FastifyInstance
 
@@ -133,11 +135,36 @@ describe('fastify-hl7 sample app tests', () => {
 
   describe('...server', () => {
 
-    test.todo('...createInbound')
+    test('...createInbound', async() => {
+      await app.register(fastifyHL7)
 
-    test.todo('...closeServer')
+      const listener = app.hl7.createInbound({port: 3001}, async () => {})
 
-    test.todo('...closeServerAll')
+      await expectEvent(listener, 'listen')
+
+      const usedCheck = await tcpPortUsed.check(3001, '0.0.0.0')
+
+      expect(usedCheck).toBe(true)
+    })
+
+    test('...closeServer', async () => {
+      await app.register(fastifyHL7)
+
+      const listener = app.hl7.createInbound({port: 3001}, async () => {})
+
+      await expectEvent(listener, 'listen')
+
+      await app.hl7.closeServer("3001")
+
+      const usedCheck = await tcpPortUsed.check(3001, '0.0.0.0')
+
+      expect(usedCheck).toBe(false)
+    })
+
+    test('...closeServerAll', async () => {
+      await app.register(fastifyHL7)
+      await app.hl7.closeServerAll()
+    })
 
   })
 
