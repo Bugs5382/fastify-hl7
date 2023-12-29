@@ -4,7 +4,7 @@ import {Batch, Message} from "node-hl7-client";
 import path from "path";
 import tcpPortUsed from 'tcp-port-used'
 import fastifyHL7 from '../src'
-import {expectEvent} from "./__utils__/utils";
+import {createDeferred, expectEvent} from "./__utils__/utils";
 
 let app: FastifyInstance
 
@@ -164,6 +164,69 @@ describe('fastify-hl7 sample app tests', () => {
     test('...closeServerAll', async () => {
       await app.register(fastifyHL7)
       await app.hl7.closeServerAll()
+    })
+
+  })
+
+  describe('...end to end', () => {
+
+    let appServer: FastifyInstance
+
+    beforeAll(() => {
+      appServer = fastify()
+    })
+
+    afterAll(async () => {
+      await appServer.close()
+    })
+
+    test('...full test', async () => {
+
+
+      await appServer.register(fastifyHL7)
+      await app.register(fastifyHL7)
+
+      const dfd = createDeferred<void>()
+      const listener = appServer.hl7.createInbound(
+        {port: 3001},
+        async (req, res) => {
+          const messageReq = req.getMessage()
+          const messageType = req.getType()
+          expect(messageType).toBe('message')
+          expect(messageReq.get('MSH.12').toString()).toBe('2.7')
+          await res.sendResponse('AA')
+      })
+
+      await expectEvent(listener, 'listen')
+
+      const usedCheck = await tcpPortUsed.check(3001, '0.0.0.0')
+      expect(usedCheck).toBe(true)
+
+      app.hl7.createClient('adt', { host: '0.0.0.0'})
+
+      const client = app.hl7.createOutbound(
+        'adt',
+        {port: 3001},
+        async (res) => {
+          const messageRes = res.getMessage()
+          expect(messageRes.get('MSA.1').toString()).toBe('AA')
+          dfd.resolve()
+      })
+
+      await expectEvent(client, 'ready')
+
+      const message = app.hl7.buildMessage({
+        messageHeader: {
+          msh_9_1: "ADT",
+          msh_9_2: "A01",
+          msh_11_1: "D",
+        }
+      })
+
+      await client.sendMessage(message)
+
+      dfd.promise
+
     })
 
   })
