@@ -16,6 +16,10 @@ declare module 'fastify' {
     _serverInstance?: Server
     /** */
     buildMessage: (props: ClientBuilderMessageOptions) => Message
+    /** */
+    closeServer: (port: string) => Promise<boolean>
+    /** */
+    closeServerAll: () => Promise<boolean>
     /** Create Client */
     createClient: (name: string, props?: ClientOptions) => void
     /** */

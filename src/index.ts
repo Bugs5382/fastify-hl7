@@ -42,6 +42,13 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
   if (typeof serverInstance !== 'undefined') {
     // Server Functions
     server = new HL7Server(serverInstance)
+
+    // before we close fastify, make sure all server instances are closed
+    fastify.addHook('preClose', async () => {
+      if (typeof server !== 'undefined') {
+        await server.closeAll()
+      }
+    })
   }
 
   // Client Functions
@@ -53,6 +60,18 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
       _serverInstance: serverInstance,
       buildMessage: function (props: ClientBuilderMessageOptions): Message {
         return client.buildMessage(props)
+      },
+      closeServer: async function (port: string): Promise<boolean> {
+        if (typeof server !== 'undefined') {
+          return await server.close(port)
+        }
+        throw new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.')
+      },
+      closeServerAll: async (): Promise<boolean> => {
+        if (typeof server !== 'undefined') {
+          return await server.closeAll()
+        }
+        throw new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.')
       },
       createClient: function (name, props) {
         client.createClient(name, props)

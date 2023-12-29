@@ -20,6 +20,11 @@ export class HL7Server {
     this._serverInboundConnections = []
   }
 
+  /**
+   * Close Inbound connection.
+   * @since 1.0.0
+   * @param port
+   */
   async close (port: string): Promise<boolean> {
     const inbound = this._serverInboundConnections.find(server => server.port === port)
     if (typeof inbound !== 'undefined') {
@@ -28,13 +33,23 @@ export class HL7Server {
     throw new errors.FASTIFY_HL7_ERR_USAGE(`No inbound server listening on port: ${port}`)
   }
 
-  async closeAll(): Promise<boolean> {
+  /**
+   * Close all Inbound connections.
+   * @since 1.0.0
+   */
+  async closeAll (): Promise<boolean> {
     this._serverInboundConnections.map(async inbound => {
       await inbound.server.close()
     })
     return true
   }
 
+  /**
+   * Create Inbound connection.
+   * @since 1.0.0
+   * @param props
+   * @param handler
+   */
   createInbound (props: ListenerOptions, handler: InboundHandler): HL7Inbound {
     const inbound = new HL7Inbound(this._server, props, handler)
     this._serverInboundConnections.push({
