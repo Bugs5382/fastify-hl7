@@ -79,7 +79,7 @@ export class HL7Client {
    * @param name
    * @param props
    */
-  createClient (name: string, props: ClientOptions): void {
+  createClient (name: string, props: ClientOptions): Client {
     const nameFormat = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/ //eslint-disable-line
     if (nameFormat.test(name)) {
       throw new errors.FASTIFY_HL7_ERR_USAGE('name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};\':"\\\\|,.<>\\/?~.')
@@ -105,6 +105,8 @@ export class HL7Client {
       client,
       ports: []
     })
+
+    return client
   }
 
   /**
@@ -142,6 +144,36 @@ export class HL7Client {
     }
 
     throw new errors.FASTIFY_HL7_ERR_USAGE('No valid client. Improper setup of a outbound connection.')
+  }
+
+  /**
+   * Get Client by the name
+   * @since 1.0.0
+   * @param name
+   */
+  getClientByName (name: string): Client | undefined {
+    const connection = this._clientConnections.find(connection => connection.name === name)
+    if (typeof connection !== 'undefined') {
+      return connection.client
+    }
+    return undefined
+  }
+
+  /**
+   * Get Connection by Port
+   * @since 1.0.0
+   * @param port
+   */
+  getClientConnectionByPort (port: string): HL7Outbound | undefined {
+    let connection: HL7Outbound | undefined
+    this._clientConnections.forEach(outbound => {
+      outbound.ports.forEach(aPort => {
+        if (aPort.port === port) {
+          connection = aPort.connection
+        }
+      })
+    })
+    return connection
   }
 
   /**

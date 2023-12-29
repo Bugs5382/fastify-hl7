@@ -1,11 +1,11 @@
 import { FastifyInstance, HL7 } from 'fastify'
 import fp from 'fastify-plugin'
-import {
+import Client, {
   Batch,
   ClientBuilderFileOptions,
   ClientBuilderMessageOptions,
   ClientBuilderOptions,
-  FileBatch,
+  FileBatch, HL7Outbound,
   Message
 } from 'node-hl7-client'
 import Server, { HL7Inbound, InboundHandler, ListenerOptions } from 'node-hl7-server'
@@ -94,8 +94,8 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
         }
         throw new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.')
       },
-      createClient: function (name, props) {
-        client.createClient(name, props)
+      createClient: function (name, props): Client {
+        return client.createClient(name, props)
       },
       createInbound: function (name: string, props: ListenerOptions, handler: InboundHandler): HL7Inbound {
         if (typeof server !== 'undefined') {
@@ -105,6 +105,24 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
       },
       createOutbound: function (name, props, handler) {
         return client.createOutbound(name, props, handler)
+      },
+      getClientByName: function (name: string): Client | undefined {
+        return client.getClientByName(name)
+      },
+      getClientConnectionByPort: function (port: string): HL7Outbound | undefined {
+        return client.getClientConnectionByPort(port)
+      },
+      getServerByName: function (name: string): HL7Inbound | undefined {
+        if (typeof server !== 'undefined') {
+          return server?.getServerByName(name)
+        }
+        throw new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.')
+      },
+      getServerByPort: function (port: string): HL7Inbound | undefined {
+        if (typeof server !== 'undefined') {
+          return server.getServerByPort(port)
+        }
+        throw new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.')
       },
       processHL7: function (text: string): Message | Batch {
         return client.processHL7(text)

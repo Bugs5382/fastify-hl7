@@ -61,7 +61,7 @@ describe('plugin fastify-hl7 tests', () => {
     test('...createInbound -- name -- failure', async () => {
       await app.register(fastifyHL7)
       try {
-        app.hl7.createInbound('adt/23*4&',{ port: 1234 }, async () => {})
+        app.hl7.createInbound('adt/23*4&', { port: 1234 }, async () => {})
       } catch (err) {
         expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};\':"\\\\|,.<>\\/?~.'))
       }
@@ -74,7 +74,7 @@ describe('plugin fastify-hl7 tests', () => {
 
       test('...createInbound -- failure', async () => {
         try {
-          app.hl7.createInbound('adt',{ port: 1234 }, async () => {})
+          app.hl7.createInbound('adt', { port: 1234 }, async () => {})
         } catch (err) {
           expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.'))
         }
@@ -142,6 +142,20 @@ describe('plugin fastify-hl7 tests', () => {
         } catch (err) {
           expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('No valid client. Improper setup of a outbound connection.'))
         }
+      })
+    })
+
+    describe('...client', () => {
+      beforeEach(async () => {
+        await app.register(fastifyHL7)
+      })
+
+      test('...getClientByName', async () => {
+        const client = app.hl7.createClient('adt', { host: '0.0.0.0' })
+
+        const clientPullName = app.hl7.getClientByName('adt')
+
+        expect(clientPullName).toEqual(client)
       })
     })
 

@@ -57,4 +57,30 @@ export class HL7Server {
     })
     return inbound
   }
+
+  /**
+   * Get Server Inbound Connection by Name
+   * @since 1.0.0
+   * @param name
+   */
+  getServerByName (name: string): HL7Inbound | undefined {
+    const inbound = this._serverInboundConnections.find(inbound => inbound.name === name)
+    if (typeof inbound !== 'undefined') {
+      return inbound.server
+    }
+    return undefined
+  }
+
+  /**
+   * Get Server Inbound Connection by Port
+   * @since 1.0.0
+   * @param port
+   */
+  getServerByPort (port: string): HL7Inbound | undefined {
+    const inbound = this._serverInboundConnections.find(inbound => inbound.port === port)
+    if (typeof inbound !== 'undefined') {
+      return inbound.server
+    }
+    return undefined
+  }
 }

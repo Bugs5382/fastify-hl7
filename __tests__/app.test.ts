@@ -147,7 +147,7 @@ describe('fastify-hl7 sample app tests', () => {
     test('...closeServer', async () => {
       await app.register(fastifyHL7)
 
-      const listener = app.hl7.createInbound('adt',{ port: 3001 }, async () => {})
+      const listener = app.hl7.createInbound('adt', { port: 3001 }, async () => {})
 
       await expectEvent(listener, 'listen')
 
@@ -160,7 +160,30 @@ describe('fastify-hl7 sample app tests', () => {
 
     test('...closeServerAll', async () => {
       await app.register(fastifyHL7)
+
+      const listener = app.hl7.createInbound('adt', { port: 3001 }, async () => {})
+
+      await expectEvent(listener, 'listen')
+
+      expect(await tcpPortUsed.check(3001, '0.0.0.0')).toBe(true)
+
       await app.hl7.closeServerAll()
+
+      expect(await tcpPortUsed.check(3001, '0.0.0.0')).toBe(false)
+    })
+
+    test('...getClientByName and getServerByPort', async () => {
+      await app.register(fastifyHL7)
+
+      const listener = app.hl7.createInbound('adt', { port: 3001 }, async () => {})
+
+      await expectEvent(listener, 'listen')
+
+      const listenerPullPort = app.hl7.getServerByPort('3001')
+      const listenerPullName = app.hl7.getServerByName('adt')
+
+      expect(listenerPullPort).toEqual(listener)
+      expect(listenerPullName).toEqual(listener)
     })
   })
 
@@ -171,7 +194,7 @@ describe('fastify-hl7 sample app tests', () => {
       await appServer.register(fastifyHL7)
       await app.register(fastifyHL7)
 
-      appServer.hl7.createInbound('adt',{ port: 3002 }, async () => {})
+      appServer.hl7.createInbound('adt', { port: 3002 }, async () => {})
       app.hl7.createClient('localhost2', { host: '0.0.0.0' })
 
       try {
@@ -232,6 +255,69 @@ describe('fastify-hl7 sample app tests', () => {
       })
 
       await client.sendMessage(message)
+
+      await dfd.promise
+
+      await appServer.close()
+    })
+
+    test('...full test, inside routes', async () => {
+      const dfd = createDeferred<void>()
+
+      // Setup remote side
+      const appServer = fastify()
+      await appServer.register(fastifyHL7)
+      appServer.hl7.createInbound(
+        'adt',
+        { port: 3001 },
+        async (req, res) => {
+          const messageReq = req.getMessage()
+          const messageType = req.getType()
+          expect(messageType).toBe('message')
+          expect(messageReq.get('MSH.12').toString()).toBe('2.7')
+          await res.sendResponse('AA')
+        }
+      )
+
+      // setup app, and then setup a client as if it's in a plugin
+      await app.register(fastifyHL7, { enableServer: false })
+      app.hl7.createClient('localhost', { host: '0.0.0.0' })
+      app.hl7.createOutbound(
+        'localhost',
+        { port: 3001 },
+        async (res) => {
+          const messageRes = res.getMessage()
+          expect(messageRes.get('MSA.1').toString()).toBe('AA')
+          dfd.resolve()
+        }
+      )
+
+      app.route({
+        method: 'GET',
+        url: '/',
+        handler: async function (_request, reply) {
+          // find the connection
+          const getOutbound = app.hl7.getClientConnectionByPort('3001')
+
+          const message = app.hl7.buildMessage({
+            messageHeader: {
+              msh_9_1: 'ADT',
+              msh_9_2: 'A01',
+              msh_11_1: 'D'
+            }
+          })
+
+          // lets send the message
+          await getOutbound?.sendMessage(message)
+
+          await reply.send({ hello: 'world' })
+        }
+      })
+
+      await app.inject({
+        method: 'GET',
+        path: '/'
+      })
 
       await dfd.promise
 
