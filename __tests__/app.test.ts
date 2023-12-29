@@ -135,7 +135,7 @@ describe('fastify-hl7 sample app tests', () => {
     test('...createInbound', async () => {
       await app.register(fastifyHL7)
 
-      const listener = app.hl7.createInbound({ port: 3001 }, async () => {})
+      const listener = app.hl7.createInbound('adt', { port: 3001 }, async () => {})
 
       await expectEvent(listener, 'listen')
 
@@ -147,7 +147,7 @@ describe('fastify-hl7 sample app tests', () => {
     test('...closeServer', async () => {
       await app.register(fastifyHL7)
 
-      const listener = app.hl7.createInbound({ port: 3001 }, async () => {})
+      const listener = app.hl7.createInbound('adt',{ port: 3001 }, async () => {})
 
       await expectEvent(listener, 'listen')
 
@@ -171,7 +171,7 @@ describe('fastify-hl7 sample app tests', () => {
       await appServer.register(fastifyHL7)
       await app.register(fastifyHL7)
 
-      appServer.hl7.createInbound({ port: 3002 }, async () => {})
+      appServer.hl7.createInbound('adt',{ port: 3002 }, async () => {})
       app.hl7.createClient('localhost2', { host: '0.0.0.0' })
 
       try {
@@ -193,6 +193,7 @@ describe('fastify-hl7 sample app tests', () => {
       const dfd = createDeferred<void>()
 
       const listener = appServer.hl7.createInbound(
+        'adt',
         { port: 3001 },
         async (req, res) => {
           const messageReq = req.getMessage()

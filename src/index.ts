@@ -97,9 +97,9 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
       createClient: function (name, props) {
         client.createClient(name, props)
       },
-      createInbound: function (props: ListenerOptions, handler: InboundHandler): HL7Inbound {
+      createInbound: function (name: string, props: ListenerOptions, handler: InboundHandler): HL7Inbound {
         if (typeof server !== 'undefined') {
-          return server.createInbound(props, handler)
+          return server.createInbound(name, props, handler)
         }
         throw new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.')
       },

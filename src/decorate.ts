@@ -26,6 +26,7 @@ export interface AClients {
 }
 
 export interface AServers {
+  name: string
   port: string
   server: HL7Inbound
 }

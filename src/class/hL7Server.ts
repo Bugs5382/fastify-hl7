@@ -38,12 +38,20 @@ export class HL7Server {
   /**
    * Create Inbound connection.
    * @since 1.0.0
+   * @param name
    * @param props
    * @param handler
    */
-  createInbound (props: ListenerOptions, handler: InboundHandler): HL7Inbound {
+  createInbound (name: string, props: ListenerOptions, handler: InboundHandler): HL7Inbound {
+    const nameFormat = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/ //eslint-disable-line
+    if (nameFormat.test(name)) {
+      throw new errors.FASTIFY_HL7_ERR_USAGE('name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};\':"\\\\|,.<>\\/?~.')
+    }
+
     const inbound = new HL7Inbound(this._server, props, handler)
+
     this._serverInboundConnections.push({
+      name,
       port: props.port.toString(),
       server: inbound
     })

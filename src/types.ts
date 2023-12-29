@@ -27,7 +27,7 @@ declare module 'fastify' {
     /** Create Client */
     createClient: (name: string, props: ClientOptions) => void
     /** */
-    createInbound: (props: ListenerOptions, handler: InboundHandler) => HL7Inbound
+    createInbound: (name: string, props: ListenerOptions, handler: InboundHandler) => HL7Inbound
     /** Create Outgoing Client Port */
     createOutbound: (name: string, props: ClientListenerOptions, handler: OutboundHandler) => HL7Outbound
     /** */

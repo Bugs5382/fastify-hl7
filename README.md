@@ -41,6 +41,7 @@ await fastify.register(fastifyHL7)
 
 ```ts
 const listener = fastify.hl7.createInbound(
+  'ib_adt',
   {port: 3001},
   async (req, res) => {
     const messageReq = req.getMessage()
@@ -69,7 +70,7 @@ and create an outbound connection.
 
 ```ts
 const client = fastify.hl7.createOutbound(
-  'localhost',
+  'ob_adt',
   {port: 3001},
   async (res) => {
     const messageRes = res.getMessage()
@@ -106,4 +107,4 @@ A far as this plugin for Fastify, there are no options to pass.
 
 ## License
 
-Licensed under [MIT](LICENSE).
+Licensed under [MIT](./LICENSE).
