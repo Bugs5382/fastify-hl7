@@ -15,7 +15,8 @@ export interface FastifyHL7Options {
 }
 
 interface AClientPorts {
-  [port: string]: HL7Outbound
+  port: string
+  connection: HL7Outbound
 }
 
 export interface AClients {

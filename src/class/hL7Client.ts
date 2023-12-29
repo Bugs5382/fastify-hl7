@@ -1,64 +1,18 @@
 import Client, {
-  Batch, ClientBuilderFileOptions,
-  ClientBuilderMessageOptions, ClientBuilderOptions,
+  Batch,
+  ClientBuilderFileOptions,
+  ClientBuilderMessageOptions,
+  ClientBuilderOptions,
   ClientListenerOptions,
-  ClientOptions, FileBatch,
-  HL7Outbound, isBatch,
+  ClientOptions,
+  FileBatch,
+  HL7Outbound,
+  isBatch,
   Message,
   OutboundHandler
 } from 'node-hl7-client'
-import Server, { HL7Inbound, InboundHandler, ListenerOptions } from 'node-hl7-server'
-import { AClients, AServers } from './decorate.js'
-import { errors } from './errors.js'
-
-export class HL7Server {
-  private readonly _server: Server
-  private readonly _serverInboundConnections: AServers[]
-
-  constructor (server: Server) {
-    this._server = server
-    this._serverInboundConnections = []
-  }
-
-  /**
-   * Close Inbound connection.
-   * @since 1.0.0
-   * @param port
-   */
-  async close (port: string): Promise<boolean> {
-    const inbound = this._serverInboundConnections.find(server => server.port === port)
-    if (typeof inbound !== 'undefined') {
-      return await inbound.server.close() // close the server for all inbound connections
-    }
-    throw new errors.FASTIFY_HL7_ERR_USAGE(`No inbound server listening on port: ${port}`)
-  }
-
-  /**
-   * Close all Inbound connections.
-   * @since 1.0.0
-   */
-  async closeAll (): Promise<boolean> {
-    this._serverInboundConnections.map(async inbound => {
-      await inbound.server.close()
-    })
-    return true
-  }
-
-  /**
-   * Create Inbound connection.
-   * @since 1.0.0
-   * @param props
-   * @param handler
-   */
-  createInbound (props: ListenerOptions, handler: InboundHandler): HL7Inbound {
-    const inbound = new HL7Inbound(this._server, props, handler)
-    this._serverInboundConnections.push({
-      port: props.port.toString(),
-      server: inbound
-    })
-    return inbound
-  }
-}
+import { AClients } from '../decorate'
+import { errors } from '../errors'
 
 export class HL7Client {
   /** @internal */
@@ -68,6 +22,14 @@ export class HL7Client {
     this._clientConnections = []
   }
 
+  async closeAll (): Promise<boolean> {
+    this._clientConnections.forEach(outbound => {
+      outbound.ports.map(async port => {
+        await port.connection.close()
+      })
+    })
+    return true
+  }
 
   /**
    * Build a HL7 Batch
@@ -119,8 +81,21 @@ export class HL7Client {
       throw new errors.FASTIFY_HL7_ERR_USAGE('name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};\':"\\\\|,.<>\\/?~.')
     }
 
+    // make sure that this does not exist already...
+    this._clientConnections.forEach((connections) => {
+      if (connections.name === name) {
+        throw new errors.FASTIFY_HL7_ERR_USAGE('name must be unique.')
+      }
+      // nto in the Client class yet
+      // if (client.getHost() === props.host) {
+      //   throw new errors.FASTIFY_HL7_ERR_USAGE(`host is already a pointer. Name is: ${connections.name}`)
+      // }
+    })
+
+    // new client
     const client = new Client(props)
 
+    // add it to the collection
     this._clientConnections.push({
       name,
       client,
@@ -143,13 +118,21 @@ export class HL7Client {
     }
 
     const getConnection = this._clientConnections.find(client => client.name === name)
+
     if (typeof getConnection !== 'undefined') {
+      // make sure port is not used all ready
+      getConnection.ports.forEach((outbound) => {
+        if (outbound.port === props.port.toString()) {
+          throw new errors.FASTIFY_HL7_ERR_USAGE(`port ${props.port} is already used with this client. Choose a new outgoing port.`)
+        }
+      })
+
       // create outbound port to the server in getConnection.client
       const outbound = new HL7Outbound(getConnection.client, props, handler)
+
       // add it to the array of known ports. need to know this, so we can get it later if needed.
-      getConnection.ports.push({
-        [props.port.toString()]: outbound
-      })
+      getConnection.ports.push({ port: props.port.toString(), connection: outbound })
+
       // return it right away. the user might do something with it.
       return outbound
     }

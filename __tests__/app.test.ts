@@ -1,10 +1,11 @@
 import fastify, { FastifyInstance } from 'fastify'
-import fs from "fs";
-import {Batch, Message} from "node-hl7-client";
-import path from "path";
+import fs from 'fs'
+import { Batch, Message } from 'node-hl7-client'
+import path from 'path'
 import tcpPortUsed from 'tcp-port-used'
 import fastifyHL7 from '../src'
-import {createDeferred, expectEvent} from "./__utils__/utils";
+import { errors } from '../src/errors'
+import { createDeferred, expectEvent, sleep } from './__utils__/utils'
 
 let app: FastifyInstance
 
@@ -17,35 +18,34 @@ afterEach(async () => {
 })
 
 describe('fastify-hl7 sample app tests', () => {
-
-  test('...build simple message', async() => {
-    await app.register(fastifyHL7, {enableServer: false}) // server disabled for quickness
+  test('...build simple message', async () => {
+    await app.register(fastifyHL7, { enableServer: false }) // server disabled for quickness
     const message = app.hl7.buildMessage({
       messageHeader: {
-        msh_9_1: "ADT",
-        msh_9_2: "A01",
-        msh_11_1: "D",
+        msh_9_1: 'ADT',
+        msh_9_2: 'A01',
+        msh_11_1: 'D'
       }
     })
-    expect(message.toString()).toContain("ADT_A01")
+    expect(message.toString()).toContain('ADT_A01')
   })
 
-  test('...build batch message', async() => {
+  test('...build batch message', async () => {
     const hl7Batch: string = 'BHS|^~\\&|||||20081231\rMSH|^~\\&|||||20081231||ADT^A01^ADT_A01|CONTROL_ID|D|2.7\rBTS|1'
 
-    await app.register(fastifyHL7, {enableServer: false}) // server disabled for quickness
+    await app.register(fastifyHL7, { enableServer: false }) // server disabled for quickness
 
     const message = app.hl7.buildMessage({
       messageHeader: {
-        msh_9_1: "ADT",
-        msh_9_2: "A01",
-        msh_10: "CONTROL_ID",
-        msh_11_1: "D"
+        msh_9_1: 'ADT',
+        msh_9_2: 'A01',
+        msh_10: 'CONTROL_ID',
+        msh_11_1: 'D'
       }
     })
     message.set('MSH.7', '20081231')
 
-    let batch = app.hl7.buildBatch()
+    const batch = app.hl7.buildBatch()
     batch.set('BHS.7', '20081231')
     batch.add(message)
     batch.end()
@@ -53,27 +53,27 @@ describe('fastify-hl7 sample app tests', () => {
     expect(batch.toString()).toEqual(hl7Batch)
   })
 
-  test('...build file batch message', async() => {
+  test('...build file batch message', async () => {
     const hl7Batch: string = 'FHS|^~\\&|||||20081231\rBHS|^~\\&|||||20081231\rMSH|^~\\&|||||20081231||ADT^A01^ADT_A01|CONTROL_ID|D|2.7\rBTS|1\rFTS|1'
 
-    await app.register(fastifyHL7, {enableServer: false}) // server disabled for quickness
+    await app.register(fastifyHL7, { enableServer: false }) // server disabled for quickness
 
     const message = app.hl7.buildMessage({
       messageHeader: {
-        msh_9_1: "ADT",
-        msh_9_2: "A01",
-        msh_10: "CONTROL_ID",
-        msh_11_1: "D"
+        msh_9_1: 'ADT',
+        msh_9_2: 'A01',
+        msh_10: 'CONTROL_ID',
+        msh_11_1: 'D'
       }
     })
     message.set('MSH.7', '20081231')
 
-    let batch = app.hl7.buildBatch()
+    const batch = app.hl7.buildBatch()
     batch.set('BHS.7', '20081231')
     batch.add(message)
     batch.end()
 
-    let fileBatch = app.hl7.buildFileBatch()
+    const fileBatch = app.hl7.buildFileBatch()
     fileBatch.set('FHS.7', '20081231')
     fileBatch.add(batch)
     fileBatch.end()
@@ -84,21 +84,20 @@ describe('fastify-hl7 sample app tests', () => {
   describe('...parse', () => {
     test('...parse a hl7 (MSH)', async () => {
       const hl7String: string = 'MSH|^~\\&|||||20081231||ADT^A01^ADT_A01|12345||2.7\rEVN||20081231'
-      await app.register(fastifyHL7, {enableServer: false}) // server disabled for quickness
+      await app.register(fastifyHL7, { enableServer: false }) // server disabled for quickness
       const message = app.hl7.processHL7(hl7String)
       expect(message instanceof Message).toBe(true)
     })
 
     test('...parse a hl7 (BHS)', async () => {
       const hl7Batch: string = 'BHS|^~\\&|||||20231208\rMSH|^~\\&|||||20231208||ADT^A01^ADT_A01|CONTROL_ID||2.7\rEVN||20081231\rEVN||20081231\rBTS|1'
-      await app.register(fastifyHL7, {enableServer: false}) // server disabled for quickness
+      await app.register(fastifyHL7, { enableServer: false }) // server disabled for quickness
       const message = app.hl7.processHL7(hl7Batch)
       expect(message instanceof Batch).toBe(true)
     })
 
     test('...parse a file (raw)', async () => {
-
-      await app.register(fastifyHL7, {enableServer: false}) // server disabled for quickness
+      await app.register(fastifyHL7, { enableServer: false }) // server disabled for quickness
       const fileBatch = app.hl7.readFile(path.join('__tests__/__hl7__/', 'hl7.readFileTestMSH.20081231.hl7'))
 
       const messages = fileBatch.messages()
@@ -115,8 +114,7 @@ describe('fastify-hl7 sample app tests', () => {
     })
 
     test('...parse a file (buffer)', async () => {
-
-      await app.register(fastifyHL7, {enableServer: false}) // server disabled for quickness
+      await app.register(fastifyHL7, { enableServer: false }) // server disabled for quickness
       const fileBatch = app.hl7.readFileBuffer(fs.readFileSync(path.join('__tests__/__hl7__/', 'hl7.readFileTestMSH.20081231.hl7')))
 
       const messages = fileBatch.messages()
@@ -134,11 +132,10 @@ describe('fastify-hl7 sample app tests', () => {
   })
 
   describe('...server', () => {
-
-    test('...createInbound', async() => {
+    test('...createInbound', async () => {
       await app.register(fastifyHL7)
 
-      const listener = app.hl7.createInbound({port: 3001}, async () => {})
+      const listener = app.hl7.createInbound({ port: 3001 }, async () => {})
 
       await expectEvent(listener, 'listen')
 
@@ -150,11 +147,11 @@ describe('fastify-hl7 sample app tests', () => {
     test('...closeServer', async () => {
       await app.register(fastifyHL7)
 
-      const listener = app.hl7.createInbound({port: 3001}, async () => {})
+      const listener = app.hl7.createInbound({ port: 3001 }, async () => {})
 
       await expectEvent(listener, 'listen')
 
-      await app.hl7.closeServer("3001")
+      await app.hl7.closeServer('3001')
 
       const usedCheck = await tcpPortUsed.check(3001, '0.0.0.0')
 
@@ -165,70 +162,79 @@ describe('fastify-hl7 sample app tests', () => {
       await app.register(fastifyHL7)
       await app.hl7.closeServerAll()
     })
-
   })
 
   describe('...end to end', () => {
+    test('...no double createOutbound to the same port', async () => {
+      const appServer = fastify()
 
-    let appServer: FastifyInstance
+      await appServer.register(fastifyHL7)
+      await app.register(fastifyHL7)
 
-    beforeAll(() => {
-      appServer = fastify()
-    })
+      appServer.hl7.createInbound({ port: 3002 }, async () => {})
+      app.hl7.createClient('localhost2', { host: '0.0.0.0' })
 
-    afterAll(async () => {
+      try {
+        app.hl7.createOutbound('localhost2', { port: 3002 }, async () => {})
+        app.hl7.createOutbound('localhost2', { port: 3002 }, async () => {})
+      } catch (err) {
+        expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('port 3002 is already used with this client. Choose a new outgoing port.'))
+      }
+
       await appServer.close()
     })
 
     test('...full test', async () => {
-
+      const appServer = fastify()
 
       await appServer.register(fastifyHL7)
       await app.register(fastifyHL7)
 
       const dfd = createDeferred<void>()
+
       const listener = appServer.hl7.createInbound(
-        {port: 3001},
+        { port: 3001 },
         async (req, res) => {
           const messageReq = req.getMessage()
           const messageType = req.getType()
           expect(messageType).toBe('message')
           expect(messageReq.get('MSH.12').toString()).toBe('2.7')
           await res.sendResponse('AA')
-      })
+        })
 
       await expectEvent(listener, 'listen')
 
       const usedCheck = await tcpPortUsed.check(3001, '0.0.0.0')
       expect(usedCheck).toBe(true)
 
-      app.hl7.createClient('adt', { host: '0.0.0.0'})
+      await sleep(10)
+
+      app.hl7.createClient('localhost', { host: '0.0.0.0' })
 
       const client = app.hl7.createOutbound(
-        'adt',
-        {port: 3001},
+        'localhost',
+        { port: 3001 },
         async (res) => {
           const messageRes = res.getMessage()
           expect(messageRes.get('MSA.1').toString()).toBe('AA')
           dfd.resolve()
-      })
+        })
 
       await expectEvent(client, 'ready')
 
       const message = app.hl7.buildMessage({
         messageHeader: {
-          msh_9_1: "ADT",
-          msh_9_2: "A01",
-          msh_11_1: "D",
+          msh_9_1: 'ADT',
+          msh_9_2: 'A01',
+          msh_11_1: 'D'
         }
       })
 
       await client.sendMessage(message)
 
-      dfd.promise
+      await dfd.promise
 
+      await appServer.close()
     })
-
   })
-
 })

@@ -91,7 +91,7 @@ describe('plugin fastify-hl7 tests', () => {
         await app.register(fastifyHL7)
         await app.hl7.closeServer('1234')
       } catch (err) {
-        expect(err).toEqual(new  errors.FASTIFY_HL7_ERR_USAGE(`No inbound server listening on port: 1234`))
+        expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('No inbound server listening on port: 1234'))
       }
     })
 
@@ -102,9 +102,18 @@ describe('plugin fastify-hl7 tests', () => {
 
       test('...createClient - name invalid characters -- failure', async () => {
         try {
-          app.hl7.createClient('hello/%323', { host: "dummy.local" })
+          app.hl7.createClient('hello/%323', { host: 'dummy.local' })
         } catch (err) {
           expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};\':"\\\\|,.<>\\/?~.'))
+        }
+      })
+
+      test('...createClient - name already used -- failure', async () => {
+        try {
+          app.hl7.createClient('hello', { host: 'dummy.local' })
+          app.hl7.createClient('hello', { host: 'dummy.local' })
+        } catch (err) {
+          expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('name must be unique.'))
         }
       })
 
@@ -123,37 +132,29 @@ describe('plugin fastify-hl7 tests', () => {
           expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('No valid client. Improper setup of a outbound connection.'))
         }
       })
-
     })
 
     describe('...hl7', () => {
-
       // these should still work even without a server working
       beforeEach(async () => {
         await app.register(fastifyHL7, { enableServer: false })
       })
 
       test('...buildBatch -- must e a message type', async () => {
-
         try {
-          app.hl7.buildBatch({ text: "BHS"})
+          app.hl7.buildBatch({ text: 'BHS' })
         } catch (err) {
           expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('Use processMessage method. This is for building.'))
         }
-
       })
 
       test('...buildMessage -- with text', async () => {
-
         try {
-          app.hl7.buildMessage({text: "MSH"})
+          app.hl7.buildMessage({ text: 'MSH' })
         } catch (err) {
           expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('Use processMessage method. This is for building.'))
         }
-
       })
-
     })
-
   })
 })

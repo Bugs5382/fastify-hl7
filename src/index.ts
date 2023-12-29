@@ -9,7 +9,8 @@ import {
   Message
 } from 'node-hl7-client'
 import Server, { HL7Inbound, InboundHandler, ListenerOptions } from 'node-hl7-server'
-import { HL7Client, HL7Server } from './class.js'
+import { HL7Server } from './class/hL7Server.js'
+import { HL7Client } from './class/hL7Client.js'
 import { FastifyHL7Options } from './decorate.js'
 import { errors } from './errors.js'
 import { validateOpts } from './validation.js'
@@ -61,15 +62,22 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
   // Client Functions
   const client = new HL7Client()
 
+  // run these before fastify closes
+  fastify.addHook('preClose', async () => {
+    if (typeof client !== 'undefined') {
+      await client.closeAll()
+    }
+  })
+
   decorateFastifyInstance(
     fastify,
     opts, {
       _serverInstance: serverInstance,
       buildBatch: function (props: ClientBuilderOptions | undefined): Batch {
-        return client.buildBatch(props);
+        return client.buildBatch(props)
       },
       buildFileBatch: function (props: ClientBuilderFileOptions | undefined): FileBatch {
-        return client.buildFileBatch(props);
+        return client.buildFileBatch(props)
       },
       buildMessage: function (props: ClientBuilderMessageOptions | undefined): Message {
         return client.buildMessage(props)
