@@ -1,5 +1,7 @@
 import fastify, { FastifyInstance } from 'fastify'
+import fs from 'fs'
 import Server from 'node-hl7-server'
+import path from 'path'
 import fastifyHL7 from '../src'
 import { errors } from '../src/errors'
 
@@ -140,7 +142,23 @@ describe('plugin fastify-hl7 tests', () => {
         await app.register(fastifyHL7, { enableServer: false })
       })
 
-      test('...buildBatch -- must e a message type', async () => {
+      test('...buildFileBatch -- fullFilePath not allowed', async () => {
+        try {
+          app.hl7.buildFileBatch({ fullFilePath: path.join('__tests__/__hl7__/', 'hl7.readFileTestMSH.20081231.hl7') })
+        } catch (err) {
+          expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('Use readFile or readFileBuffer method. This is for building.'))
+        }
+      })
+
+      test('...buildFileBatch -- fileBuffer not allowed', async () => {
+        try {
+          app.hl7.buildFileBatch({ fileBuffer: fs.readFileSync(path.join('__tests__/__hl7__/', 'hl7.readFileTestMSH.20081231.hl7')) })
+        } catch (err) {
+          expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('Use readFile or readFileBuffer method. This is for building.'))
+        }
+      })
+
+      test('...buildBatch -- must be a message type', async () => {
         try {
           app.hl7.buildBatch({ text: 'BHS' })
         } catch (err) {

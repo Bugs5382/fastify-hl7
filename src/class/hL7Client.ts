@@ -22,6 +22,10 @@ export class HL7Client {
     this._clientConnections = []
   }
 
+  /**
+   * Close All Connections for this Client
+   * @since 1.0.0
+   */
   async closeAll (): Promise<boolean> {
     this._clientConnections.forEach(outbound => {
       outbound.ports.map(async port => {
