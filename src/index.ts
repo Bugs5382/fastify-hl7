@@ -1,8 +1,8 @@
 import { FastifyInstance, HL7 } from 'fastify'
 import fp from 'fastify-plugin'
-import {ClientBuilderMessageOptions, Message} from "node-hl7-client";
-import Server from 'node-hl7-server'
-import { HL7Clients } from './class.js'
+import { Batch, ClientBuilderMessageOptions, FileBatch, Message } from 'node-hl7-client'
+import Server, { HL7Inbound, InboundHandler, ListenerOptions } from 'node-hl7-server'
+import { HL7Client, HL7Server } from './class.js'
 import { FastifyHL7Options } from './decorate.js'
 import { errors } from './errors.js'
 import { validateOpts } from './validation.js'
@@ -35,26 +35,45 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
   // A server can host many HL7 Inbound connections via different ports, this is fine.
   // Clients are different as a app could talk to different servers, on many ports.
   // So we need to do something different.
-  const server = (typeof opts.enableServer !== 'undefined' && opts.enableServer) ? new Server(opts.serverOptions) : undefined
+  const serverInstance = (typeof opts.enableServer !== 'undefined' && opts.enableServer) ? new Server(opts.serverOptions) : undefined
+
+  // Server Functions
+  let server: HL7Server | undefined
+  if (typeof serverInstance !== 'undefined') {
+    // Server Functions
+    server = new HL7Server(serverInstance)
+  }
 
   // Client Functions
-  const client = new HL7Clients()
+  const client = new HL7Client()
 
   decorateFastifyInstance(
     fastify,
     opts, {
-      _serverInstance: server,
-      buildMessage(props: ClientBuilderMessageOptions): Message {
+      _serverInstance: serverInstance,
+      buildMessage: function (props: ClientBuilderMessageOptions): Message {
         return client.buildMessage(props)
       },
       createClient: function (name, props) {
         client.createClient(name, props)
       },
+      createInbound: function (props: ListenerOptions, handler: InboundHandler): HL7Inbound {
+        if (typeof server !== 'undefined') {
+          return server.createInbound(props, handler)
+        }
+        throw new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.')
+      },
       createOutbound: function (name, props, handler) {
         return client.createOutbound(name, props, handler)
       },
-      processMessage(text: string): Message {
-        return client.processMessage(text)
+      processHL7: function (text: string): Message | Batch {
+        return client.processHL7(text)
+      },
+      readFile: function (fullFilePath: string): FileBatch {
+        return client.readFile(fullFilePath)
+      },
+      readFileBuffer: function (fileBuffer: Buffer): FileBatch {
+        return client.readFileBuffer(fileBuffer)
       }
     })
 })

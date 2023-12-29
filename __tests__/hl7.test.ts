@@ -1,5 +1,5 @@
 import fastify, { FastifyInstance } from 'fastify'
-import Server from "node-hl7-server";
+import Server from 'node-hl7-server'
 import fastifyHL7 from '../src'
 
 let app: FastifyInstance
@@ -37,9 +37,6 @@ describe('plugin fastify-hl7 tests', () => {
       expect(app.hl7).toHaveProperty('createOutbound')
       expect(app.hl7).toHaveProperty('processMessage')
       expect(app.hl7._serverInstance instanceof Server).toBe(true)
-      expect(app.hl7.inbound?.length).toBeUndefined()
-      expect(app.hl7.outbound?.length).toBeUndefined()
     })
-
   })
 })

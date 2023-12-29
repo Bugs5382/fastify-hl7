@@ -1,5 +1,5 @@
-import Client, { ClientListenerOptions, ClientOptions, HL7Outbound, OutboundHandler } from 'node-hl7-client'
-import { InboundHandler, ListenerOptions, ServerOptions } from 'node-hl7-server'
+import Client, { ClientListenerOptions, ClientOptions, HL7Outbound } from 'node-hl7-client'
+import { HL7Inbound, ServerOptions } from 'node-hl7-server'
 
 /**
  * @since 1.0.0
@@ -22,26 +22,17 @@ export interface FastifyHL7Options {
   serverOptions?: ServerOptions
 }
 
-interface AHL7 {
-  name: string
-  port: string
-}
-
-export interface AHL7Inbound extends AHL7 {
-  handler: InboundHandler
-  options: ListenerOptions
-}
-
-export interface AHL7Outbound extends AHL7 {
-  handler: OutboundHandler
-  options: ClientListenerOptions
-}
-
-export interface AClientPorts {
+interface AClientPorts {
   [port: string]: HL7Outbound
 }
 
 export interface AClients {
   name: string
   client: Client
+  ports: AClientPorts[]
+}
+
+export interface AServers {
+  port: string
+  server: HL7Inbound
 }
