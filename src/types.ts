@@ -1,58 +1,24 @@
-import { HL7Classes } from 'fastify'
-import Client, {
-  Batch,
-  ClientBuilderFileOptions,
-  ClientBuilderMessageOptions,
-  ClientBuilderOptions,
-  ClientOptions, FileBatch,
-  Message
-} from 'node-hl7-client'
-import Server, { ServerOptions } from 'node-hl7-server'
+import Server from 'node-hl7-server'
+import { ClientListenerOptions, ClientOptions, HL7Outbound, OutboundHandler } from 'node-hl7-client'
+import { AHL7Inbound, AHL7Outbound } from './decorate.js'
 
 declare module 'fastify' {
 
-  interface HL7Classes {
-    /** Batch Class
-     * @since 1.0.0
-     * @param props
-     * @constructor
-     */
-    CreateBatch: new (props?: ClientBuilderOptions) => Batch
-    /** Client Class
-     * @since 1.0.0
-     * @param props
-     * @constructor
-     */
-    CreateClient: new (props?: ClientOptions) => Client
-    /** File Batch Class
-     * @since 1.0.0
-     * @param props
-     * @constructor
-     */
-    CreateFileBatch: new (props?: ClientBuilderFileOptions) => FileBatch
-    /** Message Class
-     * @since 1.0.0
-     * @param props
-     * @constructor
-     */
-    CreateMessage: new (props?: ClientBuilderMessageOptions) => Message
-    /** Server Class
-     * @since 1.0.0
-     * @param props
-     * @constructor
-     */
-    CreateServer: new (props?: ServerOptions) => Server
+  export interface HL7 {
+    /** Server Instance **/
+    _serverInstance?: Server
+    /** Create Client */
+    createClient: (name: string, props?: ClientOptions) => void
+    /** Create Outgoing Client Port */
+    createOutbound: (name: string, props: ClientListenerOptions, handler: OutboundHandler) => HL7Outbound
+    /** An array of inbound connections. */
+    inbound?: AHL7Inbound[]
+    /** An array of outbound connections. */
+    outbound?: AHL7Outbound[]
   }
 
   export interface FastifyInstance {
     /** Main Decorator for Fastify **/
-    hl7: HL7Classes & fastifyHL7.fastifyHL7NO
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export declare namespace fastifyHL7 {
-  export interface fastifyHL7NO {
-    [namespace: string]: HL7Classes
+    hl7: HL7
   }
 }

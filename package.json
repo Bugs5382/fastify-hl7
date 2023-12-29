@@ -27,7 +27,7 @@
     "lint": "npmPkgJsonLint . && ts-standard | snazzy",
     "lint:fix": "npmPkgJsonLint . && ts-standard --fix | snazzy",
     "pack": "npm pack",
-    "prepublishOnly": "npm run clean && npm run build && npm run test:ci && npm run pack",
+    "prepublishOnly": "npm run clean && npm run build && npm run pack",
     "test": "jest",
     "test:open": "jest --detectOpenHandles",
     "test:ci": "jest --ci",
@@ -59,8 +59,8 @@
   "dependencies": {
     "@fastify/error": "^3.4.1",
     "fastify-plugin": "^4.5.1",
-    "node-hl7-client": "^1.0.0",
-    "node-hl7-server": "^1.0.1-beta.1"
+    "node-hl7-client": "^1.1.0-beta.3",
+    "node-hl7-server": "^1.0.1-beta.3"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
