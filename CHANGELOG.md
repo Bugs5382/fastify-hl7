@@ -1,3 +1,11 @@
+# [1.0.0-beta.2](https://github.com/Bugs5382/fastify-hl7/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2023-12-30)
+
+
+### Features
+
+* added functions that get ([c68830e](https://github.com/Bugs5382/fastify-hl7/commit/c68830ed6397d1bb71ad6a7720e92eaafca8e2ce))
+* added functions that get ([#3](https://github.com/Bugs5382/fastify-hl7/issues/3)) ([d94ea96](https://github.com/Bugs5382/fastify-hl7/commit/d94ea96c63726c8b6e79d52df1fb48414b1e1138))
+
 # 1.0.0-beta.1 (2023-12-29)
 
 
