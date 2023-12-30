@@ -114,7 +114,7 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
       },
       getServerByName: function (name: string): HL7Inbound | undefined {
         if (typeof server !== 'undefined') {
-          return server?.getServerByName(name)
+          return server.getServerByName(name)
         }
         throw new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.')
       },

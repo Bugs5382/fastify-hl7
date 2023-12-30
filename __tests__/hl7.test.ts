@@ -95,6 +95,22 @@ describe('plugin fastify-hl7 tests', () => {
           expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.'))
         }
       })
+
+      test('...getServerByName -- failure', async () => {
+        try {
+          await app.hl7.getServerByName('test')
+        } catch (err) {
+          expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.'))
+        }
+      })
+
+      test('...getServerByPort -- failure', async () => {
+        try {
+          await app.hl7.getServerByPort('1234')
+        } catch (err) {
+          expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.'))
+        }
+      })
     })
 
     test('...server started, close -- nothing there', async () => {
@@ -104,6 +120,18 @@ describe('plugin fastify-hl7 tests', () => {
       } catch (err) {
         expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('No inbound server listening on port: 1234'))
       }
+    })
+
+    test('...server started, getServerByName undefined ', async () => {
+      await app.register(fastifyHL7)
+      const server = await app.hl7.getServerByName('adt')
+      expect(server).toBeUndefined()
+    })
+
+    test('...server started, getServerByPort undefined ', async () => {
+      await app.register(fastifyHL7)
+      const server = await app.hl7.getServerByPort('1234')
+      expect(server).toBeUndefined()
     })
 
     describe('...no client', () => {
@@ -148,6 +176,11 @@ describe('plugin fastify-hl7 tests', () => {
     describe('...client', () => {
       beforeEach(async () => {
         await app.register(fastifyHL7)
+      })
+
+      test('...getClientByName -- nothing set', async () => {
+        const clientPullName = app.hl7.getClientByName('adt')
+        expect(clientPullName).toBeUndefined()
       })
 
       test('...getClientByName', async () => {
