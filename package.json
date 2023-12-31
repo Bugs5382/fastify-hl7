@@ -60,8 +60,8 @@
   "dependencies": {
     "@fastify/error": "^3.4.1",
     "fastify-plugin": "^4.5.1",
-    "node-hl7-client": "^1.1.0-beta.3",
-    "node-hl7-server": "^1.0.1-beta.3"
+    "node-hl7-client": "^1.1.0",
+    "node-hl7-server": "^1.1.0"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
@@ -70,7 +70,7 @@
     "@semantic-release/release-notes-generator": "^12.1.0",
     "@the-rabbit-hole/semantic-release-config": "^1.4.0",
     "@types/jest": "^29.5.11",
-    "@types/node": "^20.10.5",
+    "@types/node": "^20.10.6",
     "@types/randomstring": "^1.1.11",
     "@types/tcp-port-used": "^1.0.4",
     "@typescript-eslint/parser": "^6.16.0",
