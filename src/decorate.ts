@@ -14,17 +14,26 @@ export interface FastifyHL7Options {
   serverOptions?: ServerOptions
 }
 
+/**
+ * @since 1.0.0
+ */
 interface AClientPorts {
   port: string
   connection: HL7Outbound
 }
 
+/**
+ * @since 1.0.0
+ */
 export interface AClients {
   name: string
   client: Client
   ports: AClientPorts[]
 }
 
+/**
+ * @since 1.0.0
+ */
 export interface AServers {
   name: string
   port: string
