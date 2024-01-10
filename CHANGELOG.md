@@ -1,3 +1,4 @@
+# [1.0.0-beta.3](https://github.com/Bugs5382/fastify-hl7/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2024-01-10)
 # [1.1.0](https://github.com/Bugs5382/fastify-hl7/compare/v1.0.0...v1.1.0) (2023-12-31)
 
 
@@ -11,6 +12,7 @@
 
 ### Bug Fixes
 
+* update packages ([62dc1ec](https://github.com/Bugs5382/fastify-hl7/commit/62dc1ec5e1735c59f7417df7b102b17404d90030))
 * removed .npmignore ([bd788da](https://github.com/Bugs5382/fastify-hl7/commit/bd788dad661f7f4e271458d5b633280a9d561fef))
 
 
