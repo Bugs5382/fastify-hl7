@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/Bugs5382/fastify-hl7/compare/v1.1.1...v1.1.2) (2024-01-11)
+
+
+### Bug Fixes
+
+* update packages ([#7](https://github.com/Bugs5382/fastify-hl7/issues/7)) ([4651302](https://github.com/Bugs5382/fastify-hl7/commit/4651302ab7cefbe337d632d034da6b01f85959d8))
+
 ## [1.1.1](https://github.com/Bugs5382/fastify-hl7/compare/v1.1.0...v1.1.1) (2024-01-10)
 
 
