@@ -213,7 +213,7 @@ describe('fastify-hl7 sample app tests', () => {
       await appServer.register(fastifyHL7)
       await app.register(fastifyHL7)
 
-      const dfd = createDeferred<void>()
+      const dfd = createDeferred<void>() // eslint-disable-line @typescript-eslint/no-invalid-void-type
 
       const listener = appServer.hl7.createInbound(
         'adt',
@@ -262,7 +262,7 @@ describe('fastify-hl7 sample app tests', () => {
     })
 
     test('...full test, inside routes', async () => {
-      const dfd = createDeferred<void>()
+      const dfd = createDeferred<void>() // eslint-disable-line @typescript-eslint/no-invalid-void-type
 
       // Setup remote side
       const appServer = fastify()
