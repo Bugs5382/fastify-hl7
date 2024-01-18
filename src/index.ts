@@ -137,3 +137,4 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
 })
 
 export default fastifyHL7
+export { FastifyHL7Options }
