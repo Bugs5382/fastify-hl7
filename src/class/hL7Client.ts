@@ -11,8 +11,8 @@ import Client, {
   Message,
   OutboundHandler
 } from 'node-hl7-client'
-import { AClients } from '../decorate'
-import { errors } from '../errors'
+import { AClients } from '../decorate.js'
+import { errors } from '../errors.js'
 
 export class HL7Client {
   /** @internal */

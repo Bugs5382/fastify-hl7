@@ -1,6 +1,6 @@
 import Server, { HL7Inbound, InboundHandler, ListenerOptions } from 'node-hl7-server'
-import { AServers } from '../decorate'
-import { errors } from '../errors'
+import { AServers } from '../decorate.js'
+import { errors } from '../errors.js'
 
 export class HL7Server {
   private readonly _server: Server
