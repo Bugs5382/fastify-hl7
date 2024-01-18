@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/Bugs5382/fastify-hl7/compare/v1.1.4...v1.2.0) (2024-01-18)
+
+
+### Features
+
+* update server package ([#17](https://github.com/Bugs5382/fastify-hl7/issues/17)) ([233e182](https://github.com/Bugs5382/fastify-hl7/commit/233e18230a831878f1518fd4d4d25f28589a9134))
+* update server version ([f0548d6](https://github.com/Bugs5382/fastify-hl7/commit/f0548d63649546f3b67d4c3d9e9a993e2a4dbced))
+
 ## [1.1.4](https://github.com/Bugs5382/fastify-hl7/compare/v1.1.3...v1.1.4) (2024-01-18)
 
 

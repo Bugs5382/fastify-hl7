@@ -1,6 +1,6 @@
 {
   "name": "fastify-hl7",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "description": "A Fastify HL7 Plugin Developed in Pure TypeScript.",
   "module": "./lib/esm/index.js",
   "main": "./lib/cjs/index.js",
