@@ -1,3 +1,12 @@
+## [1.1.4](https://github.com/Bugs5382/fastify-hl7/compare/v1.1.3...v1.1.4) (2024-01-18)
+
+
+### Bug Fixes
+
+* import for ESM ([#14](https://github.com/Bugs5382/fastify-hl7/issues/14)) ([c69362e](https://github.com/Bugs5382/fastify-hl7/commit/c69362ea7a0b70b274b8e5b4da7bc6235d368fb5)), closes [#12](https://github.com/Bugs5382/fastify-hl7/issues/12)
+* update import with .js ([4527548](https://github.com/Bugs5382/fastify-hl7/commit/4527548796647c2af74116b8b18273d331bda92b))
+* update import with .js ([#13](https://github.com/Bugs5382/fastify-hl7/issues/13)) ([acf58bd](https://github.com/Bugs5382/fastify-hl7/commit/acf58bd33c1e5d9ac26e54c7d923938699ffde10)), closes [#12](https://github.com/Bugs5382/fastify-hl7/issues/12)
+
 ## [1.1.3](https://github.com/Bugs5382/fastify-hl7/compare/v1.1.2...v1.1.3) (2024-01-18)
 
 
