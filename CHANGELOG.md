@@ -1,3 +1,12 @@
+## [1.1.3](https://github.com/Bugs5382/fastify-hl7/compare/v1.1.2...v1.1.3) (2024-01-18)
+
+
+### Bug Fixes
+
+* added export of FastifyHL7Options ([013bf05](https://github.com/Bugs5382/fastify-hl7/commit/013bf05417bb2cad5169f70d73fa324c0ecaae48))
+* added export of FastifyHL7Options ([#10](https://github.com/Bugs5382/fastify-hl7/issues/10)) ([967e3aa](https://github.com/Bugs5382/fastify-hl7/commit/967e3aa25f4c3600467980bd4deaad2f2e591749))
+* export of FastifyHL7Options ([#11](https://github.com/Bugs5382/fastify-hl7/issues/11)) ([2981a29](https://github.com/Bugs5382/fastify-hl7/commit/2981a293e080cdaa18ab4d9a6bd38eb6ca969aae)), closes [#9](https://github.com/Bugs5382/fastify-hl7/issues/9)
+
 ## [1.1.2](https://github.com/Bugs5382/fastify-hl7/compare/v1.1.1...v1.1.2) (2024-01-11)
 
 
