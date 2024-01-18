@@ -61,7 +61,7 @@
     "@fastify/error": "^3.4.1",
     "fastify-plugin": "^4.5.1",
     "node-hl7-client": "^1.1.2",
-    "node-hl7-server": "^1.2.1"
+    "node-hl7-server": "^1.2.3"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
