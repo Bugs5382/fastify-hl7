@@ -1,2 +1,3 @@
-jest.config.ts
+__tests__
+vitest.config.mts
 release.config.cjs

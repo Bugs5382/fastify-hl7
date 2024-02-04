@@ -1,4 +1,4 @@
-import Server, { HL7Inbound, InboundHandler, ListenerOptions } from 'node-hl7-server'
+import Server, { Inbound, InboundHandler, ListenerOptions } from 'node-hl7-server'
 import { AServers } from '../decorate.js'
 import { errors } from '../errors.js'
 
@@ -42,13 +42,13 @@ export class HL7Server {
    * @param props
    * @param handler
    */
-  createInbound (name: string, props: ListenerOptions, handler: InboundHandler): HL7Inbound {
+  createInbound (name: string, props: ListenerOptions, handler: InboundHandler): Inbound {
     const nameFormat = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/ //eslint-disable-line
     if (nameFormat.test(name)) {
       throw new errors.FASTIFY_HL7_ERR_USAGE('name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};\':"\\\\|,.<>\\/?~.')
     }
 
-    const inbound = new HL7Inbound(this._server, props, handler)
+    const inbound = new Inbound(this._server, props, handler)
 
     this._serverInboundConnections.push({
       name,
@@ -63,7 +63,7 @@ export class HL7Server {
    * @since 1.0.0
    * @param name
    */
-  getServerByName (name: string): HL7Inbound | undefined {
+  getServerByName (name: string): Inbound | undefined {
     const inbound = this._serverInboundConnections.find(inbound => inbound.name === name)
     if (typeof inbound !== 'undefined') {
       return inbound.server
@@ -76,7 +76,7 @@ export class HL7Server {
    * @since 1.0.0
    * @param port
    */
-  getServerByPort (port: string): HL7Inbound | undefined {
+  getServerByPort (port: string): Inbound | undefined {
     const inbound = this._serverInboundConnections.find(inbound => inbound.port === port)
     if (typeof inbound !== 'undefined') {
       return inbound.server
