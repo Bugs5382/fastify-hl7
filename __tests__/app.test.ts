@@ -247,7 +247,7 @@ describe('fastify-hl7 sample app tests', () => {
           dfd.resolve()
         })
 
-      await expectEvent(client, 'ready')
+      await expectEvent(client, 'connect')
 
       const message = app.hl7.buildMessage({
         messageHeader: {
@@ -296,6 +296,8 @@ describe('fastify-hl7 sample app tests', () => {
           dfd.resolve()
         }
       )
+
+      await expectEvent(connection, 'connect')
 
       app.route({
         method: 'GET',
