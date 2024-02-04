@@ -6,7 +6,7 @@ import Client, {
   ClientListenerOptions,
   ClientOptions,
   FileBatch,
-  HL7Outbound,
+  Connection,
   isBatch,
   Message,
   OutboundHandler
@@ -117,7 +117,7 @@ export class HL7Client {
    * @param props
    * @param handler
    */
-  createOutbound (name: string, props: ClientListenerOptions, handler: OutboundHandler): HL7Outbound {
+  createConnection (name: string, props: ClientListenerOptions, handler: OutboundHandler): Connection {
     const nameFormat = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/ //eslint-disable-line
     if (nameFormat.test(name)) {
       throw new errors.FASTIFY_HL7_ERR_USAGE('name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};\':"\\\\|,.<>\\/?~.')
@@ -134,7 +134,7 @@ export class HL7Client {
       })
 
       // create outbound port to the server in getConnection.client
-      const outbound = new HL7Outbound(getConnection.client, props, handler)
+      const outbound = new Connection(getConnection.client, props, handler)
 
       // add it to the array of known ports. need to know this, so we can get it later if needed.
       getConnection.ports.push({ port: props.port.toString(), connection: outbound })
@@ -164,8 +164,8 @@ export class HL7Client {
    * @since 1.0.0
    * @param port
    */
-  getClientConnectionByPort (port: string): HL7Outbound | undefined {
-    let connection: HL7Outbound | undefined
+  getClientConnectionByPort (port: string): Connection | undefined {
+    let connection: Connection | undefined
     this._clientConnections.forEach(outbound => {
       outbound.ports.forEach(aPort => {
         if (aPort.port === port) {

@@ -1,5 +1,5 @@
-import Client, { HL7Outbound } from 'node-hl7-client'
-import { HL7Inbound, ServerOptions } from 'node-hl7-server'
+import Client, { Connection } from 'node-hl7-client'
+import { Inbound, ServerOptions } from 'node-hl7-server'
 
 /**
  * @since 1.0.0
@@ -19,7 +19,7 @@ export interface FastifyHL7Options {
  */
 interface AClientPorts {
   port: string
-  connection: HL7Outbound
+  connection: Connection
 }
 
 /**
@@ -37,5 +37,5 @@ export interface AClients {
 export interface AServers {
   name: string
   port: string
-  server: HL7Inbound
+  server: Inbound
 }

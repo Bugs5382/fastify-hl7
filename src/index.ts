@@ -5,10 +5,10 @@ import Client, {
   ClientBuilderFileOptions,
   ClientBuilderMessageOptions,
   ClientBuilderOptions,
-  FileBatch, HL7Outbound,
+  FileBatch, Connection,
   Message
 } from 'node-hl7-client'
-import Server, { HL7Inbound, InboundHandler, ListenerOptions } from 'node-hl7-server'
+import Server, { Inbound, InboundHandler, ListenerOptions } from 'node-hl7-server'
 import { HL7Server } from './class/hL7Server.js'
 import { HL7Client } from './class/hL7Client.js'
 import { FastifyHL7Options } from './decorate.js'
@@ -97,28 +97,28 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
       createClient: function (name, props): Client {
         return client.createClient(name, props)
       },
-      createInbound: function (name: string, props: ListenerOptions, handler: InboundHandler): HL7Inbound {
+      createInbound: function (name: string, props: ListenerOptions, handler: InboundHandler): Inbound {
         if (typeof server !== 'undefined') {
           return server.createInbound(name, props, handler)
         }
         throw new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.')
       },
-      createOutbound: function (name, props, handler) {
-        return client.createOutbound(name, props, handler)
+      createConnection: function (name, props, handler) {
+        return client.createConnection(name, props, handler)
       },
       getClientByName: function (name: string): Client | undefined {
         return client.getClientByName(name)
       },
-      getClientConnectionByPort: function (port: string): HL7Outbound | undefined {
+      getClientConnectionByPort: function (port: string): Connection | undefined {
         return client.getClientConnectionByPort(port)
       },
-      getServerByName: function (name: string): HL7Inbound | undefined {
+      getServerByName: function (name: string): Inbound | undefined {
         if (typeof server !== 'undefined') {
           return server.getServerByName(name)
         }
         throw new errors.FASTIFY_HL7_ERR_USAGE('server was not started. re-register plugin with enableServer set to true.')
       },
-      getServerByPort: function (port: string): HL7Inbound | undefined {
+      getServerByPort: function (port: string): Inbound | undefined {
         if (typeof server !== 'undefined') {
           return server.getServerByPort(port)
         }

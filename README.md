@@ -69,7 +69,7 @@ Within your code now you can use the fastify context and access the ```hl7``` de
 and create an outbound connection.
 
 ```ts
-const client = fastify.hl7.createOutbound(
+const client = fastify.hl7.createConnection(
   'ob_adt',
   {port: 3001},
   async (res) => {
@@ -101,9 +101,7 @@ If this is not set, enableServer will be set to ```true```. You need to set this
 ### ```serverOptions```
 
 Set this using the options from the [node-hl7-serer](https://github.com/Bugs5382/node-hl7-server/blob/main/README.md) library ServerOptions values to override server creation.
-This could be enabling IPv4 or IPv6 and other server options including TLS. SInce you can not set this after run time, it has to be set during registration.
-
-
+This could be enabling IPv4 or IPv6 and other server options including TLS. Since you cannot set this after run time, it has to be set during registration.
 
 ### External Libraries
 
