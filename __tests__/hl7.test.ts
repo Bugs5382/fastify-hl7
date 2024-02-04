@@ -2,6 +2,7 @@ import fastify, { FastifyInstance } from 'fastify'
 import fs from 'fs'
 import Server from 'node-hl7-server'
 import path from 'path'
+import { describe, expect, test, beforeEach, afterEach } from 'vitest'
 import fastifyHL7 from '../src'
 import { errors } from '../src/errors'
 
@@ -39,8 +40,7 @@ describe('plugin fastify-hl7 tests', () => {
       expect(app.hl7).toHaveProperty('closeServer')
       expect(app.hl7).toHaveProperty('closeServerAll')
       expect(app.hl7).toHaveProperty('createClient')
-      expect(app.hl7).toHaveProperty('createOutbound')
-      expect(app.hl7).toHaveProperty('createOutbound')
+      expect(app.hl7).toHaveProperty('createConnection')
       expect(app.hl7).toHaveProperty('processHL7')
       expect(app.hl7).toHaveProperty('readFile')
       expect(app.hl7).toHaveProperty('readFileBuffer')
@@ -156,17 +156,17 @@ describe('plugin fastify-hl7 tests', () => {
         }
       })
 
-      test('...createOutbound - name invalid characters -- failure', async () => {
+      test('...createConnection - name invalid characters -- failure', async () => {
         try {
-          app.hl7.createOutbound('hello/%323', { port: 1234 }, async () => {})
+          app.hl7.createConnection('hello/%323', { port: 1234 }, async () => {})
         } catch (err) {
           expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};\':"\\\\|,.<>\\/?~.'))
         }
       })
 
-      test('...createOutbound - none existing -- failure', async () => {
+      test('...createConnection - none existing -- failure', async () => {
         try {
-          app.hl7.createOutbound('hello', { port: 1234 }, async () => {})
+          app.hl7.createConnection('hello', { port: 1234 }, async () => {})
         } catch (err) {
           expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('No valid client. Improper setup of a outbound connection.'))
         }

@@ -3,6 +3,7 @@ import fs from 'fs'
 import { Batch, Message } from 'node-hl7-client'
 import path from 'path'
 import tcpPortUsed from 'tcp-port-used'
+import { describe, expect, test, beforeEach, afterEach } from 'vitest'
 import fastifyHL7 from '../src'
 import { errors } from '../src/errors'
 import { createDeferred, expectEvent, sleep } from './__utils__/utils'
@@ -188,21 +189,23 @@ describe('fastify-hl7 sample app tests', () => {
   })
 
   describe('...end to end', () => {
-    test('...no double createOutbound to the same port', async () => {
+    test('...no double createConnection to the same port', async () => {
       const appServer = fastify()
 
       await appServer.register(fastifyHL7)
       await app.register(fastifyHL7)
 
       appServer.hl7.createInbound('adt', { port: 3002 }, async () => {})
-      app.hl7.createClient('localhost2', { host: '0.0.0.0' })
+      const client = app.hl7.createClient('localhost2', { host: '0.0.0.0' })
 
       try {
-        app.hl7.createOutbound('localhost2', { port: 3002 }, async () => {})
-        app.hl7.createOutbound('localhost2', { port: 3002 }, async () => {})
+        app.hl7.createConnection('localhost2', { port: 3002 }, async () => {})
+        app.hl7.createConnection('localhost2', { port: 3002 }, async () => {})
       } catch (err) {
         expect(err).toEqual(new errors.FASTIFY_HL7_ERR_USAGE('port 3002 is already used with this client. Choose a new outgoing port.'))
       }
+
+      await client.closeAll()
 
       await appServer.close()
     })
@@ -221,7 +224,7 @@ describe('fastify-hl7 sample app tests', () => {
         async (req, res) => {
           const messageReq = req.getMessage()
           const messageType = req.getType()
-          expect(messageType).toBe('message')
+          expect(messageType).toBe('file')
           expect(messageReq.get('MSH.12').toString()).toBe('2.7')
           await res.sendResponse('AA')
         })
@@ -235,7 +238,7 @@ describe('fastify-hl7 sample app tests', () => {
 
       app.hl7.createClient('localhost', { host: '0.0.0.0' })
 
-      const client = app.hl7.createOutbound(
+      const client = app.hl7.createConnection(
         'localhost',
         { port: 3001 },
         async (res) => {
@@ -244,7 +247,7 @@ describe('fastify-hl7 sample app tests', () => {
           dfd.resolve()
         })
 
-      await expectEvent(client, 'ready')
+      await expectEvent(client, 'connect')
 
       const message = app.hl7.buildMessage({
         messageHeader: {
@@ -257,6 +260,8 @@ describe('fastify-hl7 sample app tests', () => {
       await client.sendMessage(message)
 
       await dfd.promise
+
+      await client.close()
 
       await appServer.close()
     })
@@ -273,7 +278,7 @@ describe('fastify-hl7 sample app tests', () => {
         async (req, res) => {
           const messageReq = req.getMessage()
           const messageType = req.getType()
-          expect(messageType).toBe('message')
+          expect(messageType).toBe('file')
           expect(messageReq.get('MSH.12').toString()).toBe('2.7')
           await res.sendResponse('AA')
         }
@@ -282,7 +287,7 @@ describe('fastify-hl7 sample app tests', () => {
       // setup app, and then setup a client as if it's in a plugin
       await app.register(fastifyHL7, { enableServer: false })
       app.hl7.createClient('localhost', { host: '0.0.0.0' })
-      app.hl7.createOutbound(
+      const connection = app.hl7.createConnection(
         'localhost',
         { port: 3001 },
         async (res) => {
@@ -291,6 +296,8 @@ describe('fastify-hl7 sample app tests', () => {
           dfd.resolve()
         }
       )
+
+      await expectEvent(connection, 'connect')
 
       app.route({
         method: 'GET',
@@ -320,6 +327,8 @@ describe('fastify-hl7 sample app tests', () => {
       })
 
       await dfd.promise
+
+      await connection.close()
 
       await appServer.close()
     })
