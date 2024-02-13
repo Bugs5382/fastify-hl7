@@ -1,3 +1,35 @@
+# [2.0.0](https://github.com/Bugs5382/fastify-hl7/compare/v1.2.0...v2.0.0) (2024-02-04)
+
+
+### Bug Fixes
+
+* ci actions ([#22](https://github.com/Bugs5382/fastify-hl7/issues/22)) ([1005c6a](https://github.com/Bugs5382/fastify-hl7/commit/1005c6ad83c5e7ca8e09d975b790f71f856447f1))
+
+
+### Features
+
+* first batch of changes ([8af49c5](https://github.com/Bugs5382/fastify-hl7/commit/8af49c5cd91436e56913e50cd9d618ed55027b30))
+* first batch of changes ([#19](https://github.com/Bugs5382/fastify-hl7/issues/19)) ([3aa061f](https://github.com/Bugs5382/fastify-hl7/commit/3aa061ffd1cd42a798fa1e776b046e9eca31c339))
+* v2.0.0 ([#20](https://github.com/Bugs5382/fastify-hl7/issues/20)) ([5a54975](https://github.com/Bugs5382/fastify-hl7/commit/5a54975738da4faf1c29e06b86b2106a6cce5b42))
+
+
+### BREAKING CHANGES
+
+* - node 20
+
+[ci skip]
+* - node 20
+
+[ci skip]
+
+# [1.2.0](https://github.com/Bugs5382/fastify-hl7/compare/v1.1.4...v1.2.0) (2024-01-18)
+
+
+### Features
+
+* update server package ([#17](https://github.com/Bugs5382/fastify-hl7/issues/17)) ([233e182](https://github.com/Bugs5382/fastify-hl7/commit/233e18230a831878f1518fd4d4d25f28589a9134))
+* update server version ([f0548d6](https://github.com/Bugs5382/fastify-hl7/commit/f0548d63649546f3b67d4c3d9e9a993e2a4dbced))
+
 ## [1.1.4](https://github.com/Bugs5382/fastify-hl7/compare/v1.1.3...v1.1.4) (2024-01-18)
 
 
