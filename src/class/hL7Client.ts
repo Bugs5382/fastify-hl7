@@ -9,7 +9,7 @@ import Client, {
   Connection,
   isBatch,
   Message,
-  OutboundHandler
+  OutboundHandler, createHL7Date
 } from 'node-hl7-client'
 import { AClients } from '../decorate.js'
 import { errors } from '../errors.js'
@@ -46,6 +46,17 @@ export class HL7Client {
       throw new errors.FASTIFY_HL7_ERR_USAGE('Use processMessage method. This is for building.')
     }
     return new Batch({ ...props })
+  }
+
+  /**
+   * Build Date
+   * @description Build a date string based off HL7 Standards
+   * @since 2.1.0
+   * @param date
+   * @param length Options are 8, 12, or 14 (default)
+   */
+  buildDate (date: Date, length?: string): string {
+    return createHL7Date(date, length)
   }
 
   /**
