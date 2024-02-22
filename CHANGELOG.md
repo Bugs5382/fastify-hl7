@@ -1,3 +1,12 @@
+# [2.1.0](https://github.com/Bugs5382/fastify-hl7/compare/v2.0.0...v2.1.0) (2024-02-22)
+
+
+### Features
+
+* added buildDate ([58e3573](https://github.com/Bugs5382/fastify-hl7/commit/58e3573215fd4249625bb27fdf22ecac750cdc2f))
+* added buildDate ([#29](https://github.com/Bugs5382/fastify-hl7/issues/29)) ([6543743](https://github.com/Bugs5382/fastify-hl7/commit/65437437eaca31ecd9796536e9fef1bad8219382))
+* added new features in ([#30](https://github.com/Bugs5382/fastify-hl7/issues/30)) ([1d254bd](https://github.com/Bugs5382/fastify-hl7/commit/1d254bd5b41711836b856856fedcdc0ddbb56182)), closes [#28](https://github.com/Bugs5382/fastify-hl7/issues/28)
+
 # [2.0.0](https://github.com/Bugs5382/fastify-hl7/compare/v1.2.0...v2.0.0) (2024-02-04)
 
 
