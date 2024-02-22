@@ -17,6 +17,10 @@ declare module 'fastify' {
     /** Build HL7 Batch
      * @since 1.0.0 */
     buildBatch: (props?: ClientBuilderOptions) => Batch
+    /** BBuild Date
+     * @since 2.1.0
+     */
+    buildDate: (date: Date, length?: string) => string
     /** Build HL7 File Batch
      * @since 1.0.0 */
     buildFileBatch: (props?: ClientBuilderFileOptions) => FileBatch
