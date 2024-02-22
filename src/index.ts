@@ -76,6 +76,9 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
       buildBatch: function (props: ClientBuilderOptions | undefined): Batch {
         return client.buildBatch(props)
       },
+      buildDate: function (date: Date, length?: string): string {
+        return client.buildDate(date, length)
+      },
       buildFileBatch: function (props: ClientBuilderFileOptions | undefined): FileBatch {
         return client.buildFileBatch(props)
       },
