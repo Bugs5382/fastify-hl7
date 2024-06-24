@@ -57,7 +57,7 @@
   },
   "homepage": "https://github.com/Bugs5382/fastify-hl7#readme",
   "dependencies": {
-    "@fastify/error": "^3.4.1",
+    "@fastify/error": "^4.0.0",
     "fastify-plugin": "^4.5.1",
     "node-hl7-client": "^2.2.0",
     "node-hl7-server": "^2.3.0"
