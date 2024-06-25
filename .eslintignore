@@ -1,3 +1,2 @@
-__tests__
-vitest.config.mts
-release.config.cjs
+/__tests__/*
+vitest.config.ts

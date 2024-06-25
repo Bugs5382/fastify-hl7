@@ -41,7 +41,7 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
   // Since there can only be one server per IP address
   // (i.e., the host this is running on.) There can only be more than one.
   // A server can host many HL7 Inbound connections via different ports, this is fine.
-  // Clients are different as a app could talk to different servers, on many ports.
+  // Clients are different as an app could talk to different servers, on many ports.
   // So we need to do something different.
   const serverInstance = (typeof opts.enableServer !== 'undefined' && opts.enableServer) ? new Server(opts.serverOptions) : undefined
 

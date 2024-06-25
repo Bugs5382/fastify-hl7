@@ -208,9 +208,9 @@ export class HL7Client {
    * @param fullFilePath
    * @returns FileBatch
    * @example
-   *
+   * ```ts
    * fastify.hl7.readFile( path.join('temp/', 'hl7.readTestBHS.20231208.hl7') )
-   *
+   * ```
    */
   readFile (fullFilePath: string): FileBatch {
     return new FileBatch({ fullFilePath })
@@ -223,10 +223,10 @@ export class HL7Client {
    * @param fileBuffer
    * @returns FileBatch
    * @example
-   *
+   * ```ts
    * const fileBuffer = fs.readFileSync(path.join('temp/', 'hl7.readTestBHS.20231208.hl7'))
    * fastify.hl7.readFileBuffer(fileBuffer)
-   *
+   * ```
    */
   readFileBuffer (fileBuffer: Buffer): FileBatch {
     return new FileBatch({ fileBuffer })
