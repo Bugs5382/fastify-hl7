@@ -2,7 +2,7 @@
   "tsconfig": "src/tsconfig.esm.json",
   "entryPoints": ["./src/api.ts"],
   "githubPages": false,
-  "includeVersion": false,
+  "includeVersion": true,
   "out": "docs",
   "name": "Fastify HL7",
   "sidebarLinks": {
