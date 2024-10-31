@@ -37,7 +37,7 @@ export class HL7Client {
 
   /**
    * Build a HL7 Batch
-   * @description Create a properly formatted HL7 Batch.
+   *@remarks Create a properly formatted HL7 Batch.
    * @since 1.0.0
    * @param props
    */
@@ -50,7 +50,7 @@ export class HL7Client {
 
   /**
    * Build Date
-   * @description Build a date string based off HL7 Standards
+   *@remarks Build a date string based off HL7 Standards
    * @since 2.1.0
    * @param date
    * @param length Options are 8, 12, or 14 (default)
@@ -61,7 +61,7 @@ export class HL7Client {
 
   /**
    * Build a HL7 File Batch
-   * @description Create a properly formatted HL7 File Batch.
+   *@remarks Create a properly formatted HL7 File Batch.
    * @since 1.0.0
    * @param props
    */
@@ -74,7 +74,7 @@ export class HL7Client {
 
   /**
    * Build a HL7 Message
-   * @description Create a properly formatted HL7 message.
+   *@remarks Create a properly formatted HL7 message.
    * @since 1.0.0
    * @param props
    */
@@ -122,7 +122,7 @@ export class HL7Client {
 
   /**
    * Create an HL7 Outbound Connection
-   * @description Connect to an HL7 Server/Broker
+   *@remarks Connect to an HL7 Server/Broker
    * @since 1.0.0
    * @param name The name stored within created client connections.
    * @param props
@@ -189,7 +189,7 @@ export class HL7Client {
 
   /**
    * Process a HL7
-   * @description A HL7 message that could either be a Message (MSH) or Batch (BHS)
+   *@remarks A HL7 message that could either be a Message (MSH) or Batch (BHS)
    * @since 1.0.0
    * @param text Raw HL& String
    */
@@ -203,7 +203,7 @@ export class HL7Client {
 
   /**
    * Read File
-   * @description Pass the correct path of the file you want to read.
+   *@remarks Pass the correct path of the file you want to read.
    * @since 1.0.0
    * @param fullFilePath
    * @returns FileBatch
@@ -218,7 +218,7 @@ export class HL7Client {
 
   /**
    * Read a File Buffer
-   * @description Translate an already Buffered HL7 FHS segment to decode it.
+   *@remarks Translate an already Buffered HL7 FHS segment to decode it.
    * @since 1.0.0
    * @param fileBuffer
    * @returns FileBatch

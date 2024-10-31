@@ -34,14 +34,14 @@ declare module 'fastify' {
      * @since 1.0.0 */
     closeServerAll: () => Promise<boolean>
     /** Create Client
-     * @description Connecting to a remote server/broker that accepts connections.
+     *@remarks Connecting to a remote server/broker that accepts connections.
      * @since 1.0.0 */
     createClient: (name: string, props: ClientOptions) => Client
     /** Create an incoming port connection on the server.
      * @since 1.0.0 */
     createInbound: (name: string, props: ListenerOptions, handler: InboundHandler) => Inbound
     /** Create Outgoing Client Port
-     * @description This is on the established client that we are already a part off.
+     *@remarks This is on the established client that we are already a part off.
      * @since 1.0.0 */
     createConnection: (name: string, props: ClientListenerOptions, handler: OutboundHandler) => Connection
     /** Get Client (Outbound) connection by name.
@@ -69,7 +69,7 @@ declare module 'fastify' {
 
   export interface FastifyInstance {
     /** Main Decorator for Fastify
-     * @description hl7 is the decorator that everything hangs off.
+     *@remarks hl7 is the decorator that everything hangs off.
      * @since 1.0.0 **/
     hl7: HL7
   }

@@ -9,7 +9,7 @@ If you are using this NPM package, please consider giving it a :star: star.
 This will increase its visibility and solicit more contribution from the outside.
 
 This documentation is how to use this plugin, not on how to use the libraries above.
-Head [here](#external-libraries) if you need help with those.
+Head [here](#external-libraries-options) if you need help with those.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ Head [here](#external-libraries) if you need help with those.
    2. [Client Quick Start](#client-quick-start)
 3. [Full Documentation](#full-documentation)
    1. [This Library Options](#this-library-options)
-   2. [External Libraries](#external-libraries)
+   2. [External Libraries Options](#external-libraries-options)
 4. [Acknowledgements](#acknowledgements)
 5. [License](#license)
 
@@ -97,19 +97,17 @@ await client.sendMessage(message)
 
 If this is not set, enableServer will be set to ```true```. You need to set this to ```false``` will turn off the server capabilities.
 
-
 ### ```serverOptions```
 
 Set this using the options from the [node-hl7-serer](https://github.com/Bugs5382/node-hl7-server/blob/main/README.md) library ServerOptions values to override server creation.
 This could be enabling IPv4 or IPv6 and other server options including TLS. Since you cannot set this after run time, it has to be set during registration.
 
-### External Libraries
+### External Libraries Options
 
 * [node-hl7-client](https://github.com/Bugs5382/node-hl7-client/blob/main/README.md) - For the Client, Parser, and Builder to review their options that can be passed as props.
 * [node-hl7-server](https://github.com/Bugs5382/node-hl7-server/blob/main/README.md) - For the Server to the options that can be passed as props.
 
-Please review the library for more complete documentation.
-A far as this plugin for Fastify, there are no options to pass.
+Please review the libraries for more complete documentation.
 
 ## Acknowledgements
 
