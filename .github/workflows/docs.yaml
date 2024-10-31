@@ -28,9 +28,6 @@ jobs:
     needs: History
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout src
-        uses: actions/checkout@v4
-
       - name: Create Directory
         run: mkdir -p ./docs
 
@@ -41,13 +38,22 @@ jobs:
 
       - run: tar -xf documentation.tar ./docs -C ./docs
 
-      - name: Build
+      - name: Create Directory
+        run: mkdir -p ./lib ./node_modules
+
+      - name: Download the build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cache
+          path: ./
+
+      - name: Use NodeJS LTS
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
       - name: Install NPM
-        run: npm install --ignore-scripts
+        run: npm ci
 
       - name: Build Documents
         run: npm run typedoc
