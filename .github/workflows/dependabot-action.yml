@@ -18,7 +18,7 @@ jobs:
         id: metadata
         uses: dependabot/fetch-metadata@v1.3.4
         with:
-          github-token: "${{ secrets.GH_TOKEN }}"
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
           skip-commit-verification: true
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,7 +32,7 @@ jobs:
           fi
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run unit tests
         run: |
           npm test
@@ -42,11 +42,11 @@ jobs:
           PR_URL=$(gh pr list --json state:open author:dependabot[bot] base:$PR_BASE_BRANCH -q '.[].url' | jq -r 'join(" ")')
           echo "::set-output name=pr_url::$PR_URL"
         env:
-          PR_BASE_BRANCH: develop
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          PR_BASE_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Merge aggregated PRs
         if: steps.aggregate_prs.outputs.pr_url != ''
         run: |
           gh pr merge --auto --merge ${{ steps.aggregate_prs.outputs.pr_url }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

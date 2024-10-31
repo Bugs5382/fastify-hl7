@@ -3,6 +3,7 @@
   "entryPoints": ["./src/api.ts"],
   "githubPages": false,
   "includeVersion": true,
+  "plugin": ["@shipgirl/typedoc-plugin-versions"],
   "out": "docs",
   "name": "Fastify HL7",
   "sidebarLinks": {
