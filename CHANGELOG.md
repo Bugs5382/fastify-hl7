@@ -1,3 +1,18 @@
+# [3.0.0](https://github.com/Bugs5382/fastify-hl7/compare/v2.2.0...v3.0.0) (2024-10-31)
+
+
+### Features
+
+* 3.0.0 ([#78](https://github.com/Bugs5382/fastify-hl7/issues/78)) ([5f5cc9a](https://github.com/Bugs5382/fastify-hl7/commit/5f5cc9a3f58a3863866021406d09e31874e27568))
+* update typedoc plugin ([993380f](https://github.com/Bugs5382/fastify-hl7/commit/993380f452955386fb0f6757fc9d3ca0ff359072))
+* update typedoc plugin ([#79](https://github.com/Bugs5382/fastify-hl7/issues/79)) ([eddd958](https://github.com/Bugs5382/fastify-hl7/commit/eddd95890af424e9e143a0ddf83257b7c56ea42e))
+* updated packages ([743e34c](https://github.com/Bugs5382/fastify-hl7/commit/743e34c40ce44ef1a04a48fb22c52f197a2a0497))
+
+
+### BREAKING CHANGES
+
+* update node-hl7-server package to 3.0.0 which has a breaking change
+
 # [2.2.0](https://github.com/Bugs5382/fastify-hl7/compare/v2.1.0...v2.2.0) (2024-06-25)
 
 
