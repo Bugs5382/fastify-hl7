@@ -34,48 +34,51 @@ npm install fastify-hl7
 Register this as a plugin.
 
 ```ts
-await fastify.register(fastifyHL7)
+await fastify.register(fastifyHL7);
 ```
 
 ### Server Quick Start
 
 ```ts
 const listener = fastify.hl7.createInbound(
-  'ib_adt',
-  {port: 3001},
+  "ib_adt",
+  { port: 3001 },
   async (req, res) => {
-    const messageReq = req.getMessage()
-    const messageType = req.getType()
+    const messageReq = req.getMessage();
+    const messageType = req.getType();
     // your logic here
-    await res.sendResponse('AA')
-})
+    await res.sendResponse("AA");
+  },
+);
 ```
-This will create a inbound connection. You can optionally return it to a variable to attach advanced listeners. 
+
+This will create a inbound connection. You can optionally return it to a variable to attach advanced listeners.
 
 ### Client Quick Start
 
 ```ts
 import fastify from "fastify";
 
-fastify.hl7.createClient('localhost', {host: '0.0.0.0'})
+fastify.hl7.createClient("localhost", { host: "0.0.0.0" });
 ```
 
 This will create a "client" class that will then allow you to attach different outbound connections.
-The name ```localhost``` in a unique identifier to this host, so it can be used to attach different outbound connections to this server/broker.
+The name `localhost` in a unique identifier to this host, so it can be used to attach different outbound connections to this server/broker.
 
 There might be times when your HL7 messages need to cross-over to different hosts/server/inbound endpoints and this is how you would get them.
 
-Within your code now you can use the fastify context and access the ```hl7``` decorator,
+Within your code now you can use the fastify context and access the `hl7` decorator,
 and create an outbound connection.
 
 ```ts
 const client = fastify.hl7.createConnection(
-  'ob_adt',
-  {port: 3001},
+  "ob_adt",
+  { port: 3001 },
   async (res) => {
-    const messageRes = res.getMessage()
+    const messageRes = res.getMessage();
     // Your code here. Either a failure or a success, but still do your work here.
-})
+  },
+);
 
 // building a HL7 Message Segment
 const message = app.hl7.buildMessage({
@@ -83,10 +86,10 @@ const message = app.hl7.buildMessage({
     msh_9_1: "ADT",
     msh_9_2: "A01",
     msh_11_1: "D",
-  }
-})
+  },
+});
 
-await client.sendMessage(message)
+await client.sendMessage(message);
 ```
 
 ## Full Documentation
@@ -95,17 +98,17 @@ await client.sendMessage(message)
 
 ### `enableServer`
 
-If this is not set, enableServer will be set to ```true```. You need to set this to ```false``` will turn off the server capabilities.
+If this is not set, enableServer will be set to `true`. You need to set this to `false` will turn off the server capabilities.
 
-### ```serverOptions```
+### `serverOptions`
 
 Set this using the options from the [node-hl7-serer](https://github.com/Bugs5382/node-hl7-server/blob/main/README.md) library ServerOptions values to override server creation.
 This could be enabling IPv4 or IPv6 and other server options including TLS. Since you cannot set this after run time, it has to be set during registration.
 
 ### External Libraries Options
 
-* [node-hl7-client](https://github.com/Bugs5382/node-hl7-client/blob/main/README.md) - For the Client, Parser, and Builder to review their options that can be passed as props.
-* [node-hl7-server](https://github.com/Bugs5382/node-hl7-server/blob/main/README.md) - For the Server to the options that can be passed as props.
+- [node-hl7-client](https://github.com/Bugs5382/node-hl7-client/blob/main/README.md) - For the Client, Parser, and Builder to review their options that can be passed as props.
+- [node-hl7-server](https://github.com/Bugs5382/node-hl7-server/blob/main/README.md) - For the Server to the options that can be passed as props.
 
 Please review the libraries for more complete documentation.
 
