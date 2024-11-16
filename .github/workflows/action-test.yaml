@@ -5,11 +5,16 @@ on:
   pull_request:
     branches:
       - main
+      - develop
     types:
       - opened
+      - reopened
+      - ready_for_review
       - synchronize
 
+
 jobs:
+
   Build:
     runs-on: ubuntu-latest
     strategy:
@@ -23,12 +28,19 @@ jobs:
         with:
           node-version: ${{matrix.node-version}}
 
-      - name: Run
+      - name: Pre-Run
         run: |
           npm install --package-lock-only
           npm install --ignore-scripts
-          npm run build
+
+      - name: Run Tests and Lint
+        run: |
+          npm run lint
           npm run test
+
+      - name: Run Build
+        run: |
+          npm run build
 
       - name: Upload build artifact
         if: matrix.node-version == 'lts/*'
@@ -38,4 +50,6 @@ jobs:
           path: |
             package.json
             package-lock.json
+            README.md
+            LICENSE
             ./lib
