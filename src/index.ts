@@ -63,6 +63,10 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
     // Server Functions
     server = new HL7Server(serverInstance);
 
+    server.on("inbound", (port: string) => {
+      fastify.log.info("HL7 Inbound Server Listening on Port %s", port);
+    });
+
     // before we close fastify, make sure all server instances are closed
     fastify.addHook("preClose", async () => {
       if (typeof server !== "undefined") {
