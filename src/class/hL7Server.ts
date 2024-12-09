@@ -1,3 +1,4 @@
+import { EventEmitter } from "node:events";
 import Server, {
   Inbound,
   InboundHandler,
@@ -6,11 +7,12 @@ import Server, {
 import { AServers } from "../decorate.js";
 import { errors } from "../errors.js";
 
-export class HL7Server {
+export class HL7Server extends EventEmitter {
   private readonly _server: Server;
   private readonly _serverInboundConnections: AServers[];
 
   constructor(server: Server) {
+    super();
     this._server = server;
     this._serverInboundConnections = [];
   }
@@ -69,6 +71,9 @@ export class HL7Server {
       port: props.port.toString(),
       server: inbound,
     });
+
+    this.emit("inbound", props.port.toString());
+
     return inbound;
   }
 

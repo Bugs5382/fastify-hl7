@@ -5,6 +5,7 @@ import path from "path";
 import { describe, expect, test, beforeEach, afterEach } from "vitest";
 import fastifyHL7 from "../src";
 import { errors } from "../src/errors";
+import { getCurrentDateYYYYMMDD } from "./__utils__/utils.js";
 
 let app: FastifyInstance;
 
@@ -233,10 +234,14 @@ describe("plugin fastify-hl7 tests", () => {
 
       test("...getClientByName", async () => {
         const client = app.hl7.createClient("adt", { host: "0.0.0.0" });
-
         const clientPullName = app.hl7.getClientByName("adt");
-
         expect(clientPullName).toEqual(client);
+      });
+
+      test("...buildDate", async () => {
+        expect(app.hl7.buildDate(new Date(), "8")).toEqual(
+          getCurrentDateYYYYMMDD(),
+        );
       });
     });
 
