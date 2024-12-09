@@ -92,6 +92,7 @@
     "vitest": "^2.1.8"
   },
   "precommit": [
+    "format",
     "lint:fix",
     "build"
   ]

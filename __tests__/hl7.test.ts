@@ -234,9 +234,7 @@ describe("plugin fastify-hl7 tests", () => {
 
       test("...getClientByName", async () => {
         const client = app.hl7.createClient("adt", { host: "0.0.0.0" });
-
         const clientPullName = app.hl7.getClientByName("adt");
-
         expect(clientPullName).toEqual(client);
       });
 
