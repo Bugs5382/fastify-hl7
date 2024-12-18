@@ -12,6 +12,9 @@ jobs:
   History:
     runs-on: ubuntu-latest
     steps:
+      - name: Basic Checkout
+        uses: actions/checkout@v4
+
       - name: Fetch all branches
         run: git fetch --all
 
@@ -87,6 +90,9 @@ jobs:
     needs: Build
     runs-on: ubuntu-latest
     steps:
+      - name: Basic Checkout
+        uses: actions/checkout@v4
+
       - name: Fetch all branches
         run: git fetch --all
 
