@@ -18,7 +18,7 @@ jobs:
       - name: Check if branch exists
         id: branch_check
         run: |
-          if git rev-parse --verify origin/gh-pages >/dev/null 2>&1; then
+          if git show-ref --quiet refs/remotes/origin/gh-pages; then
             echo "Branch exists"
             echo "exists=true" >> $GITHUB_ENV
           else
@@ -93,7 +93,7 @@ jobs:
       - name: Check if branch exists
         id: branch_check
         run: |
-          if git rev-parse --verify origin/gh-pages >/dev/null 2>&1; then
+         if git show-ref --quiet refs/remotes/origin/gh-pages; then
             echo "Branch exists"
             echo "exists=true" >> $GITHUB_ENV
           else
