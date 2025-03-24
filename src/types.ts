@@ -24,7 +24,10 @@ declare module "fastify" {
     /** Build HL7 Batch
      * @since 1.0.0 */
     buildBatch: (props?: ClientBuilderOptions) => Batch;
-    /** BBuild Date
+    /** Build Date
+     * @remarks Build a date string based off HL7 Standards
+     * @param date
+     * @param length Options are 8, 12, or 14 (default)
      * @since 2.1.0
      */
     buildDate: (date: Date, length?: string) => string;
