@@ -30,7 +30,7 @@ jobs:
 
       - name: Pre-Run
         run: |
-          npm install --package-lock-only
+          npm install --package-lock-only --force
           npm install --ignore-scripts --force
 
       - name: Run Tests and Lint
