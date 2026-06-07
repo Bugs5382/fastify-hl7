@@ -184,8 +184,8 @@ describe("plugin fastify-hl7 tests", () => {
 
       test("...createClient - name already used -- failure", async () => {
         try {
-          app.hl7.createClient("hello", { host: "dummy.local" });
-          app.hl7.createClient("hello", { host: "dummy.local" });
+          app.hl7.createClient("hello", { host: "dummy.local", version: "2.7" });
+          app.hl7.createClient("hello", { host: "dummy.local", version: "2.7" });
         } catch (err) {
           expect(err).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE("name must be unique."),
@@ -233,7 +233,7 @@ describe("plugin fastify-hl7 tests", () => {
       });
 
       test("...getClientByName", async () => {
-        const client = app.hl7.createClient("adt", { host: "0.0.0.0" });
+        const client = app.hl7.createClient("adt", { host: "0.0.0.0", version: "2.7" });
         const clientPullName = app.hl7.getClientByName("adt");
         expect(clientPullName).toEqual(client);
       });

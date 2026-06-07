@@ -15,7 +15,7 @@ import Server, {
   ListenerOptions,
 } from "node-hl7-server";
 import { HL7Server } from "./class/hL7Server.js";
-import { HL7Client } from "./class/hL7Client.js";
+import { HL7Client, DateLength } from "./class/hL7Client.js";
 import { FastifyHL7Options } from "./decorate.js";
 import { errors } from "./errors.js";
 import { validateOpts } from "./validation.js";
@@ -90,7 +90,7 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
     buildBatch: function (props: ClientBuilderOptions | undefined): Batch {
       return client.buildBatch(props);
     },
-    buildDate: function (date: Date, length?: string): string {
+    buildDate: function (date: Date, length?: DateLength): string {
       return client.buildDate(date, length);
     },
     buildFileBatch: function (

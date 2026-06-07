@@ -61,8 +61,8 @@
   "dependencies": {
     "@fastify/error": "^4.1.0",
     "fastify-plugin": "^5.0.1",
-    "node-hl7-client": "^3.0.0",
-    "node-hl7-server": "^3.2.3"
+    "node-hl7-client": "^4.0.0",
+    "node-hl7-server": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

@@ -15,6 +15,10 @@ import Client, {
 import { AClients } from "../decorate.js";
 import { errors } from "../errors.js";
 
+/** Accepted HL7 date-length values, derived from node-hl7-client's
+ * `createHL7Date` so it stays in sync with the upstream type. */
+export type DateLength = Parameters<typeof createHL7Date>[1];
+
 export class HL7Client {
   /** @internal */
   private readonly _clientConnections: AClients[];
@@ -43,11 +47,6 @@ export class HL7Client {
    * @param props
    */
   buildBatch(props?: ClientBuilderOptions): Batch {
-    if (typeof props !== "undefined" && typeof props.text !== "undefined") {
-      throw new errors.FASTIFY_HL7_ERR_USAGE(
-        "Use processMessage method. This is for building.",
-      );
-    }
     return new Batch({ ...props });
   }
 
@@ -58,7 +57,7 @@ export class HL7Client {
    * @param date
    * @param length Options are 8, 12, or 14 (default)
    */
-  buildDate(date: Date, length?: string): string {
+  buildDate(date: Date, length?: DateLength): string {
     return createHL7Date(date, length);
   }
 

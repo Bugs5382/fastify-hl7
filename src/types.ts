@@ -15,6 +15,7 @@ import Client, {
   Message,
   OutboundHandler,
 } from "node-hl7-client";
+import { DateLength } from "./class/hL7Client.js";
 
 declare module "fastify" {
   export interface HL7 {
@@ -30,7 +31,7 @@ declare module "fastify" {
      * @param length Options are 8, 12, or 14 (default)
      * @since 2.1.0
      */
-    buildDate: (date: Date, length?: string) => string;
+    buildDate: (date: Date, length?: DateLength) => string;
     /** Build HL7 File Batch
      * @since 1.0.0 */
     buildFileBatch: (props?: ClientBuilderFileOptions) => FileBatch;

@@ -148,7 +148,7 @@ describe("fastify-hl7 sample app tests", () => {
 
       const listener = app.hl7.createInbound(
         "adt",
-        { port: 3001 },
+        { port: 3001, version: "2.7" },
         async () => {},
       );
 
@@ -164,7 +164,7 @@ describe("fastify-hl7 sample app tests", () => {
 
       const listener = app.hl7.createInbound(
         "adt",
-        { port: 3001 },
+        { port: 3001, version: "2.7" },
         async () => {},
       );
 
@@ -182,7 +182,7 @@ describe("fastify-hl7 sample app tests", () => {
 
       const listener = app.hl7.createInbound(
         "adt",
-        { port: 3001 },
+        { port: 3001, version: "2.7" },
         async () => {},
       );
 
@@ -200,7 +200,7 @@ describe("fastify-hl7 sample app tests", () => {
 
       const listener = app.hl7.createInbound(
         "adt",
-        { port: 3001 },
+        { port: 3001, version: "2.7" },
         async () => {},
       );
 
@@ -221,8 +221,11 @@ describe("fastify-hl7 sample app tests", () => {
       await appServer.register(fastifyHL7);
       await app.register(fastifyHL7);
 
-      appServer.hl7.createInbound("adt", { port: 3002 }, async () => {});
-      const client = app.hl7.createClient("localhost2", { host: "0.0.0.0" });
+      appServer.hl7.createInbound("adt", { port: 3002, version: "2.7" }, async () => {});
+      const client = app.hl7.createClient("localhost2", {
+        host: "0.0.0.0",
+        version: "2.7",
+      });
 
       try {
         app.hl7.createConnection("localhost2", { port: 3002 }, async () => {});
@@ -250,11 +253,11 @@ describe("fastify-hl7 sample app tests", () => {
 
       const listener = appServer.hl7.createInbound(
         "adt",
-        { port: 3001 },
+        { port: 3001, version: "2.7" },
         async (req, res) => {
           const messageReq = req.getMessage();
           const messageType = req.getType();
-          expect(messageType).toBe("file");
+          expect(messageType).toBe("message");
           expect(messageReq.get("MSH.12").toString()).toBe("2.7");
           await res.sendResponse("AA");
         },
@@ -267,7 +270,7 @@ describe("fastify-hl7 sample app tests", () => {
 
       await sleep(10);
 
-      app.hl7.createClient("localhost", { host: "0.0.0.0" });
+      app.hl7.createClient("localhost", { host: "0.0.0.0", version: "2.7" });
 
       const client = app.hl7.createConnection(
         "localhost",
@@ -304,17 +307,17 @@ describe("fastify-hl7 sample app tests", () => {
       // Setup remote side
       const appServer = fastify();
       await appServer.register(fastifyHL7);
-      appServer.hl7.createInbound("adt", { port: 3001 }, async (req, res) => {
+      appServer.hl7.createInbound("adt", { port: 3001, version: "2.7" }, async (req, res) => {
         const messageReq = req.getMessage();
         const messageType = req.getType();
-        expect(messageType).toBe("file");
+        expect(messageType).toBe("message");
         expect(messageReq.get("MSH.12").toString()).toBe("2.7");
         await res.sendResponse("AA");
       });
 
       // setup app, and then setup a client as if it's in a plugin
       await app.register(fastifyHL7, { enableServer: false });
-      app.hl7.createClient("localhost", { host: "0.0.0.0" });
+      app.hl7.createClient("localhost", { host: "0.0.0.0", version: "2.7" });
       const connection = app.hl7.createConnection(
         "localhost",
         { port: 3001 },
