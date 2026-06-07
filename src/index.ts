@@ -15,8 +15,8 @@ import Server, {
   ListenerOptions,
 } from "node-hl7-server";
 import { HL7Server } from "./class/hL7Server.js";
-import { HL7Client, DateLength } from "./class/hL7Client.js";
-import { FastifyHL7Options } from "./decorate.js";
+import { HL7Client, type DateLength } from "./class/hL7Client.js";
+import type { FastifyHL7Options } from "./decorate.js";
 import { errors } from "./errors.js";
 import { validateOpts } from "./validation.js";
 export * from "./types.js";
@@ -172,4 +172,4 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
 });
 
 export default fastifyHL7;
-export { FastifyHL7Options };
+export type { FastifyHL7Options };

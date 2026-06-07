@@ -2,36 +2,41 @@
   "name": "fastify-hl7",
   "version": "3.3.0",
   "description": "A Fastify HL7 Plugin Developed in Pure TypeScript.",
-  "module": "./lib/esm/index.js",
-  "main": "./lib/cjs/index.js",
-  "types": "./lib/types/index.d.ts",
+  "type": "module",
+  "module": "./dist/index.mjs",
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./lib/types/index.d.ts",
-      "import": "./lib/esm/index.js",
-      "require": "./lib/cjs/index.js",
-      "default": "./lib/cjs/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "files": [
-    "lib/",
+    "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=20.15.0"
   },
   "scripts": {
-    "clean": "rm -rf coverage docs lib temp",
-    "build": "tsc -p src/tsconfig.esm.json && tsc -p src/tsconfig.cjs.json && tsc -p src/tsconfig.types.json && ./bin/build-types.sh",
-    "build:watch": "tsc -p src/tsconfig.esm.json -w",
-    "build:watch:cjs": "tsc -p src/tsconfig.cjs.json -w",
+    "clean": "rm -rf coverage docs dist temp",
+    "build": "tsdown && tsc --emitDeclarationOnly",
+    "build:watch": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
     "npm:lint": "npmPkgJsonLint .",
     "format": "prettier --write 'README.md' 'src/**/*.ts' '__tests__/**/*.ts' '*.{mts,mjs}'",
     "lint": "npm run npm:lint && eslint | snazzy",
     "lint:fix": "npm run npm:lint && eslint --fix | snazzy",
-    "pack": "npm pack",
-    "prepublishOnly": "npm run clean && npm run build && npm run pack",
+    "prepublishOnly": "npm run clean && npm run build",
     "test": "vitest run",
     "test:verbose": "vitest run --reporter verbose",
     "test:watch": "vitest watch",
@@ -88,6 +93,7 @@
     "ts-node": "^10.9.2",
     "tsd": "^0.31.2",
     "typedoc": "^0.28.1",
+    "tsdown": "^0.22.0",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.27.0",
     "vitest": "^3.0.9"

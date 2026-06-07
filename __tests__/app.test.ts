@@ -221,7 +221,11 @@ describe("fastify-hl7 sample app tests", () => {
       await appServer.register(fastifyHL7);
       await app.register(fastifyHL7);
 
-      appServer.hl7.createInbound("adt", { port: 3002, version: "2.7" }, async () => {});
+      appServer.hl7.createInbound(
+        "adt",
+        { port: 3002, version: "2.7" },
+        async () => {},
+      );
       const client = app.hl7.createClient("localhost2", {
         host: "0.0.0.0",
         version: "2.7",
@@ -307,13 +311,17 @@ describe("fastify-hl7 sample app tests", () => {
       // Setup remote side
       const appServer = fastify();
       await appServer.register(fastifyHL7);
-      appServer.hl7.createInbound("adt", { port: 3001, version: "2.7" }, async (req, res) => {
-        const messageReq = req.getMessage();
-        const messageType = req.getType();
-        expect(messageType).toBe("message");
-        expect(messageReq.get("MSH.12").toString()).toBe("2.7");
-        await res.sendResponse("AA");
-      });
+      appServer.hl7.createInbound(
+        "adt",
+        { port: 3001, version: "2.7" },
+        async (req, res) => {
+          const messageReq = req.getMessage();
+          const messageType = req.getType();
+          expect(messageType).toBe("message");
+          expect(messageReq.get("MSH.12").toString()).toBe("2.7");
+          await res.sendResponse("AA");
+        },
+      );
 
       // setup app, and then setup a client as if it's in a plugin
       await app.register(fastifyHL7, { enableServer: false });
