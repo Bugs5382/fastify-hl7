@@ -5,12 +5,12 @@ import { FastifyHL7Options } from "./decorate.js";
  * @param opts
  */
 export const validateOpts = async (
-  opts: FastifyHL7Options,
+  options: FastifyHL7Options,
 ): Promise<FastifyHL7Options> => {
   // Mandatory, Defaulted
-  if (typeof opts.enableServer === "undefined") {
-    opts.enableServer = true;
+  if (options.enableServer === undefined) {
+    options.enableServer = true;
   }
 
-  return opts;
+  return options;
 };

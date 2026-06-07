@@ -1,23 +1,22 @@
-import pluginJs from "@eslint/js";
-import tseslint from "typescript-eslint";
-import pluginPrettier from "eslint-plugin-prettier";
+import { createESLintConfig } from "@the-rabbit-hole/eslint-config";
 
-export default [
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-  {
-    files: ["**/*.{js,mjs,cjs,ts}"],
-    plugins: {
-      prettier: pluginPrettier,
-    },
+// Node library (a Fastify plugin) -- no React, a11y, Storybook, or testing-library.
+// The shared config keeps TypeScript, Unicorn, Perfectionist, and Prettier-as-a-rule,
+// and already ignores dist/lib/coverage/docs/node_modules globally.
+export default createESLintConfig({
+  disableExtends: [
+    "eslintReact",
+    "eslintA11y",
+    "eslintStorybook",
+    "eslintTesting",
+  ],
+  rules: {
+    // Matches this package's long-standing config.
+    "@typescript-eslint/no-explicit-any": "off",
+    // HL7Server extends Node's EventEmitter (.on/.emit); EventTarget is a
+    // breaking API change, not a refactor.
+    "unicorn/prefer-event-target": "off",
+    // res/req/opts are Fastify + Node idioms, not abbreviations to expand.
+    "unicorn/prevent-abbreviations": "off",
   },
-  {
-    rules: {
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unused-vars": "off",
-    },
-  },
-  {
-    ignores: ["node_modules/*", "docs/*", "dist/*", "coverage/*", "__tests__/*"],
-  },
-];
+});

@@ -1,9 +1,10 @@
-import { EventEmitter } from "node:events";
 import Server, {
   Inbound,
   InboundHandler,
   ListenerOptions,
 } from "node-hl7-server";
+import { EventEmitter } from "node:events";
+
 import { AServers } from "../decorate.js";
 import { errors } from "../errors.js";
 
@@ -26,7 +27,7 @@ export class HL7Server extends EventEmitter {
     const inbound = this._serverInboundConnections.find(
       (server) => server.port === port,
     );
-    if (typeof inbound !== "undefined") {
+    if (inbound !== undefined) {
       return await inbound.server.close(); // close the server for all inbound connections
     }
     throw new errors.FASTIFY_HL7_ERR_USAGE(
@@ -54,25 +55,25 @@ export class HL7Server extends EventEmitter {
    */
   createInbound(
     name: string,
-    props: ListenerOptions,
+    properties: ListenerOptions,
     handler: InboundHandler,
   ): Inbound {
-    const nameFormat = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/; //eslint-disable-line
+    const nameFormat = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
     if (nameFormat.test(name)) {
       throw new errors.FASTIFY_HL7_ERR_USAGE(
         "name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};':\"\\\\|,.<>\\/?~.",
       );
     }
 
-    const inbound = new Inbound(this._server, props, handler);
+    const inbound = new Inbound(this._server, properties, handler);
 
     this._serverInboundConnections.push({
       name,
-      port: props.port.toString(),
+      port: properties.port.toString(),
       server: inbound,
     });
 
-    this.emit("inbound", props.port.toString());
+    this.emit("inbound", properties.port.toString());
 
     return inbound;
   }
@@ -86,7 +87,7 @@ export class HL7Server extends EventEmitter {
     const inbound = this._serverInboundConnections.find(
       (inbound) => inbound.name === name,
     );
-    if (typeof inbound !== "undefined") {
+    if (inbound !== undefined) {
       return inbound.server;
     }
     return undefined;
@@ -101,7 +102,7 @@ export class HL7Server extends EventEmitter {
     const inbound = this._serverInboundConnections.find(
       (inbound) => inbound.port === port,
     );
-    if (typeof inbound !== "undefined") {
+    if (inbound !== undefined) {
       return inbound.server;
     }
     return undefined;
