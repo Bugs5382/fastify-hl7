@@ -1,0 +1,42 @@
+name: License Check
+# Fail if a 3rd-party dependency carries a license outside the allowlist.
+# Ecosystem-aware: the npm job runs only when package.json exists, the Go job
+# only when go.mod exists. No SAST/vuln scanning (deliberately out of scope).
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  npm:
+    name: npm dependency licenses
+    if: ${{ hashFiles('package.json') != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: license-checker
+        run: |
+          npx --yes license-checker-rseidelsohn \
+            --production --excludePrivatePackages \
+            --onlyAllow "MIT;ISC;Apache-2.0;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;Unlicense;BlueOak-1.0.0;Python-2.0"
+
+  go:
+    name: Go dependency licenses
+    if: ${{ hashFiles('go.mod') != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+      - name: go-licenses
+        run: |
+          go install github.com/google/go-licenses@latest
+          "$(go env GOPATH)/bin/go-licenses" check ./... \
+            --allowed_licenses=MIT,ISC,Apache-2.0,BSD-2-Clause,BSD-3-Clause,0BSD,CC0-1.0,Unlicense
