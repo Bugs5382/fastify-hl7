@@ -137,3 +137,5 @@ package-lock.json
 # Webstorm
 .idea
 lib
+# Local design notes (not tracked)
+plan/
