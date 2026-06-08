@@ -4,8 +4,6 @@
 
 ### What Changed 👀
 
-- fix(ci): skip PR Body check for Dependabot @Bugs5382 (#105)
-
 #### 💥 Breaking Changes
 
 - feat!: upgrade to node-hl7 v4.0.0 @Bugs5382 (#88)
