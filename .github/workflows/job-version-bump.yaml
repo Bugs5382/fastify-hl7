@@ -6,6 +6,7 @@ name: Release Manager
 # the maintainer publishes the Release manually, which creates the tag and
 # triggers the npm publish workflow.
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
