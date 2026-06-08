@@ -11,8 +11,15 @@ If you use this package, please consider giving it a ⭐ — it raises visibilit
 contribution from the outside.
 
 > This documentation covers **how to use the plugin**. It does not re-document the underlying
-> libraries (message building, segments, transport, the HL7 version a connection negotiates). For
-> those, see [External Libraries](#-external-libraries).
+> libraries (segment-by-segment message building, transport internals). For those, see
+> [External Libraries](#-external-libraries).
+
+> 🟢 **Requires Node.js ≥ 22** (inherited from the underlying `node-hl7` packages).
+
+> ⚠️ **HL7 version is required.** Every client and every inbound listener must pin an explicit
+> `version` — one of `"2.1" | "2.2" | "2.3" | "2.3.1" | "2.4" | "2.5" | "2.5.1" | "2.6" | "2.7" |
+> "2.7.1" | "2.8"`. There is no default. A client's `version` must match the `MSH.12` of every
+> message it sends; an inbound listener rejects (`AR`) any message whose `MSH.12` differs.
 
 ## Table of Contents
 
@@ -44,6 +51,8 @@ contribution from the outside.
 npm install fastify-hl7
 ```
 
+Requires Node.js ≥ 22.
+
 ## 🚀 Basic Usage
 
 ### Register the plugin
@@ -63,13 +72,13 @@ pass `{ enableServer: false }` for a client-only app (see [Plugin Options](#-plu
 
 ### Server quick start
 
-Create an inbound listener. The handler receives each inbound message and replies with an
-acknowledgement code (`"AA"` accept, `"AE"` error, `"AR"` reject):
+Create an inbound listener. It must pin an HL7 `version`. The handler receives each inbound message
+and replies with an acknowledgement code (`"AA"` accept, `"AE"` error, `"AR"` reject):
 
 ```ts
 const listener = app.hl7.createInbound(
   "ib_adt",
-  { port: 3001 },
+  { port: 3001, version: "2.7" },
   async (req, res) => {
     const message = req.getMessage();
     const type = req.getType();
@@ -80,17 +89,18 @@ const listener = app.hl7.createInbound(
 );
 ```
 
-`createInbound` returns the listener so you can attach advanced event handlers if needed.
+`createInbound` returns the listener so you can attach advanced event handlers if needed. Any inbound
+message whose `MSH.12` is not `"2.7"` is rejected with an `AR` before your handler runs.
 
 ### Client quick start
 
-A **client** is a named handle to one remote host. Outbound **connections** are attached to that
-client by its name — so the first argument to `createConnection` is the **client name**, not a new
-identifier:
+A **client** is a named handle to one remote host and pins the HL7 `version` for everything it
+sends. Outbound **connections** are attached to that client by its name — so the first argument to
+`createConnection` is the **client name**, not a new identifier (it inherits the client's version):
 
 ```ts
-// 1. Register a named client pointed at a remote host.
-app.hl7.createClient("adt_host", { host: "127.0.0.1" });
+// 1. Register a named client pointed at a remote host, pinned to an HL7 version.
+app.hl7.createClient("adt_host", { host: "127.0.0.1", version: "2.7" });
 
 // 2. Attach an outbound connection to that client (note: "adt_host" matches above).
 const connection = app.hl7.createConnection(
@@ -98,16 +108,18 @@ const connection = app.hl7.createConnection(
   { port: 3001 },
   async (res) => {
     const reply = res.getMessage();
-    // Handle the ACK/NAK the remote returned.
+    // Handle the ACK/NAK the remote returned, e.g. res.getMessage().get("MSA.1").
   },
 );
 
-// 3. Build a message and send it.
+// 3. Build a message (its MSH.12 must match the client version) and send it.
 const message = app.hl7.buildMessage({
   messageHeader: {
     msh_9_1: "ADT",
     msh_9_2: "A01",
-    msh_11_1: "D",
+    msh_10: "MSG00001",
+    msh_11_1: "P",
+    msh_12: "2.7",
   },
 });
 
@@ -125,7 +137,8 @@ The client name is a unique identifier for a host, so you can attach several out
 ### 1. Full round-trip in one app
 
 A single Fastify app that listens for inbound HL7 **and** sends outbound HL7 to itself — useful for
-local testing or a relay:
+local testing or a relay. Keep the versions aligned across the listener, the client, and the
+message:
 
 ```ts
 import fastify from "fastify";
@@ -135,36 +148,37 @@ const app = fastify();
 await app.register(fastifyHL7);
 
 // Inbound: accept everything, echo back an "AA".
-app.hl7.createInbound("ib_adt", { port: 3001 }, async (req, res) => {
+app.hl7.createInbound("ib_adt", { port: 3001, version: "2.7" }, async (req, res) => {
   app.log.info("inbound %s", req.getType());
   await res.sendResponse("AA");
 });
 
-// Outbound: a client pointed at our own listener.
-app.hl7.createClient("self", { host: "127.0.0.1" });
+// Outbound: a client pointed at our own listener, same version.
+app.hl7.createClient("self", { host: "127.0.0.1", version: "2.7" });
 const out = app.hl7.createConnection("self", { port: 3001 }, async (res) => {
-  app.log.info("ack: %o", res.getMessage());
+  app.log.info("ack: %s", res.getMessage().get("MSA.1").toString());
 });
 
 await app.listen({ port: 3000 });
 
 const message = app.hl7.buildMessage({
-  messageHeader: { msh_9_1: "ADT", msh_9_2: "A01", msh_11_1: "D" },
+  messageHeader: { msh_9_1: "ADT", msh_9_2: "A01", msh_11_1: "P", msh_12: "2.7" },
 });
 await out.sendMessage(message);
 ```
 
 ### 2. Route multiple inbound listeners
 
-One server hosts many inbound listeners on different ports — for example, one per feed:
+One server hosts many inbound listeners on different ports — for example, one per feed. Each pins
+its own version:
 
 ```ts
-app.hl7.createInbound("adt_feed", { port: 3001 }, async (req, res) => {
+app.hl7.createInbound("adt_feed", { port: 3001, version: "2.7" }, async (req, res) => {
   // ADT (admit/discharge/transfer) feed.
   await res.sendResponse("AA");
 });
 
-app.hl7.createInbound("oru_feed", { port: 3002 }, async (req, res) => {
+app.hl7.createInbound("oru_feed", { port: 3002, version: "2.7" }, async (req, res) => {
   // ORU (observation result) feed; branch on the message type.
   if (req.getType() === "ORU") {
     // ...persist the result...
@@ -180,19 +194,21 @@ app.hl7.createInbound("oru_feed", { port: 3002 }, async (req, res) => {
 
 ### 3. Multiple clients and outbound connections
 
-An interface engine often talks to several downstream systems. Create one client per host, and one
-connection per port on that host:
+An interface engine often talks to several downstream systems. Create one client per host (each with
+its version), and one connection per port on that host:
 
 ```ts
-app.hl7.createClient("lab", { host: "10.0.0.10" });
-app.hl7.createClient("pharmacy", { host: "10.0.0.20" });
+app.hl7.createClient("lab", { host: "10.0.0.10", version: "2.5.1" });
+app.hl7.createClient("pharmacy", { host: "10.0.0.20", version: "2.7" });
 
 const labOrders = app.hl7.createConnection("lab", { port: 6661 }, async () => {});
 const labResults = app.hl7.createConnection("lab", { port: 6662 }, async () => {});
 const rxOrders = app.hl7.createConnection("pharmacy", { port: 6661 }, async () => {});
 
 await labOrders.sendMessage(
-  app.hl7.buildMessage({ messageHeader: { msh_9_1: "ORM", msh_9_2: "O01", msh_11_1: "P" } }),
+  app.hl7.buildMessage({
+    messageHeader: { msh_9_1: "ORM", msh_9_2: "O01", msh_11_1: "P", msh_12: "2.5.1" },
+  }),
 );
 ```
 
@@ -201,9 +217,9 @@ Reusing the same port on the same client throws — pick a distinct outbound por
 ### 4. Build messages, batches, and file batches
 
 ```ts
-// A single message.
+// A single message — MSH.12 must match the sending client's version.
 const message = app.hl7.buildMessage({
-  messageHeader: { msh_9_1: "ADT", msh_9_2: "A01", msh_11_1: "P" },
+  messageHeader: { msh_9_1: "ADT", msh_9_2: "A01", msh_11_1: "P", msh_12: "2.7" },
 });
 
 // A batch (BHS) that groups several messages.
@@ -221,7 +237,8 @@ const stamp = app.hl7.buildDate(new Date(), 14);
 
 > Building takes the message/batch/builder options from `node-hl7-client`. `buildFileBatch` is for
 > *creating* a file batch — to read an existing one, use `readFile` / `readFileBuffer`
-> ([recipe 5](#5-parse-inbound-hl7-and-read-files)).
+> ([recipe 5](#5-parse-inbound-hl7-and-read-files)). For the richer class-based builder
+> (`new HL7_2_7().buildMSH(...).buildPID(...)`), see the node-hl7-client docs.
 
 ### 5. Parse inbound HL7 and read files
 
@@ -242,7 +259,7 @@ const fromBuffer = app.hl7.readFileBuffer(readFileSync("temp/hl7.readTestBHS.202
 Inside an inbound handler, reply with the acknowledgement code that fits the outcome:
 
 ```ts
-app.hl7.createInbound("ib_adt", { port: 3001 }, async (req, res) => {
+app.hl7.createInbound("ib_adt", { port: 3001, version: "2.7" }, async (req, res) => {
   try {
     const message = req.getMessage();
     // ...process the message...
@@ -255,7 +272,8 @@ app.hl7.createInbound("ib_adt", { port: 3001 }, async (req, res) => {
 ```
 
 Use `"AR"` (Application Reject) for messages you will not process at all (wrong type, unsupported
-trigger, etc.).
+trigger, etc.). For verbatim, vendor-shaped acknowledgements, `node-hl7-server` exposes
+`sendCustomResponse`.
 
 ### 7. Graceful shutdown
 
@@ -280,9 +298,12 @@ Server options pass straight through to `node-hl7-server` and can only be set at
 (you cannot change them after the server is created):
 
 ```ts
+import { readFileSync } from "node:fs";
+
 await app.register(fastifyHL7, {
   serverOptions: {
-    // e.g. enable IPv6, bind options, or TLS — see node-hl7-server's ServerOptions.
+    // e.g. bindAddress, IPv6, or TLS — see node-hl7-server's ServerOptions.
+    bindAddress: "0.0.0.0",
     tls: {
       key: readFileSync("server.key"),
       cert: readFileSync("server.crt"),
@@ -290,6 +311,9 @@ await app.register(fastifyHL7, {
   },
 });
 ```
+
+Client-side TLS is set per client via the `tls` option on `createClient`
+(`{ host, version, tls: true | ConnectionOptions }`).
 
 ### 9. Look up live clients and listeners
 
@@ -312,7 +336,7 @@ Guard accordingly:
 await app.register(fastifyHL7, { enableServer: false });
 
 try {
-  app.hl7.createInbound("ib", { port: 3001 }, async () => {});
+  app.hl7.createInbound("ib", { port: 3001, version: "2.7" }, async () => {});
 } catch (err) {
   // FASTIFY_HL7_ERR_USAGE: "server was not started.
   // re-register plugin with enableServer set to true."
@@ -330,7 +354,7 @@ All methods hang off the `hl7` decorator on the Fastify instance.
 
 | Method | Returns | Description |
 |---|---|---|
-| `createInbound(name, options, handler)` | `Inbound` | Start an inbound listener on `options.port`; `handler(req, res)` handles each message. |
+| `createInbound(name, options, handler)` | `Inbound` | Start an inbound listener on `options.port` pinned to `options.version`; `handler(req, res)` handles each message. |
 | `closeServer(port)` | `Promise<boolean>` | Close the listener on `port`. |
 | `closeServerAll()` | `Promise<boolean>` | Close all listeners. |
 | `getServerByName(name)` | `Inbound \| undefined` | Look up a listener by name. |
@@ -343,7 +367,7 @@ The server methods throw `FASTIFY_HL7_ERR_USAGE` when the plugin was registered 
 
 | Method | Returns | Description |
 |---|---|---|
-| `createClient(name, options)` | `Client` | Register a uniquely named client pointed at `options.host`. |
+| `createClient(name, options)` | `Client` | Register a uniquely named client pointed at `options.host` and pinned to `options.version`. |
 | `createConnection(name, options, handler)` | `Connection` | Attach an outbound connection (on `options.port`) to the client called `name`; `handler(res)` handles the reply. |
 | `getClientByName(name)` | `Client \| undefined` | Look up a client by name. |
 | `getClientConnectionByPort(port)` | `Connection \| undefined` | Look up an outbound connection by port. |
@@ -352,7 +376,7 @@ The server methods throw `FASTIFY_HL7_ERR_USAGE` when the plugin was registered 
 
 | Method | Returns | Description |
 |---|---|---|
-| `buildMessage(options?)` | `Message` | Build a single HL7 message. |
+| `buildMessage(options?)` | `Message` | Build a single HL7 message (set `messageHeader.msh_12` to the client version). |
 | `buildBatch(options?)` | `Batch` | Build an HL7 batch (BHS). |
 | `buildFileBatch(options?)` | `FileBatch` | Build an HL7 file batch (FHS) for writing. |
 | `buildDate(date, length?)` | `string` | Format a `Date` as an HL7 timestamp (length `8`, `12`, or `14`; default `14`). |
@@ -377,15 +401,17 @@ While disabled, the server-side methods throw `FASTIFY_HL7_ERR_USAGE`.
 ### `serverOptions`
 
 The `ServerOptions` from
-[`node-hl7-server`](https://github.com/Bugs5382/node-hl7-server/blob/main/README.md). Use it to
-enable IPv4/IPv6, TLS, and other server-creation settings. It can only be set at registration time.
+[`node-hl7-server`](https://github.com/Bugs5382/node-hl7) — `bindAddress`, encoding, TLS, and other
+server-creation settings. It can only be set at registration time.
+
+> Per-client and per-listener settings (including the required HL7 `version`, host, port, and TLS)
+> are passed to `createClient` / `createConnection` / `createInbound`, not here.
 
 ## 🔌 External Libraries
 
-This plugin documents only its own surface. For message content, segment building, transport, and
-the **HL7 version** a client/listener negotiates (the underlying libraries require an explicit
-version — there is no default), see the [`node-hl7`](https://github.com/Bugs5382/node-hl7) repo,
-which ships both packages:
+This plugin documents only its own surface. For segment-by-segment message building (the class-based
+`HL7_2_x` builders), transport internals, parsing, and the full client/server option sets, see the
+[`node-hl7`](https://github.com/Bugs5382/node-hl7) repo, which ships both packages:
 
 - `node-hl7-client` — Client, Parser, and Builder options.
 - `node-hl7-server` — Server and Inbound options.
