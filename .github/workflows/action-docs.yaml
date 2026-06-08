@@ -3,7 +3,8 @@ on:
   workflow_dispatch:
   workflow_call:
 
-# peaceiris pushes the built docs to the gh-pages branch (legacy Pages source).
+# The composite action below restores prior versions, builds typedoc, and pushes
+# to gh-pages -- it needs contents: write.
 permissions:
   contents: write
 
@@ -19,44 +20,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # Restore the previously published docs into ./docs so
-      # typedoc-plugin-versions appends this version instead of replacing the
-      # whole version history. First publish (no gh-pages yet) is a no-op.
-      - name: Restore published docs
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
-            git clone --branch gh-pages --depth 1 \
-              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" .docs-prev
-            rm -rf .docs-prev/.git
-            mkdir -p docs
-            cp -a .docs-prev/. docs/
-            rm -rf .docs-prev
-          else
-            echo "No gh-pages branch yet -- first publish."
-          fi
-
-      # Generate the lockfile BEFORE setup-node so its npm cache has something to
-      # key on and `npm ci` has a lockfile (the repo does not commit one).
+      # The repo does not commit a lockfile; generate one so the action's
+      # setup-node npm cache and `npm ci` have a lockfile to key on.
       - name: Generate lockfile
         run: npm install --package-lock-only --ignore-scripts --legacy-peer-deps
 
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - name: Publish versioned docs
+        uses: Bugs5382/typedoc-pages-action@v0
         with:
-          node-version: lts/*
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts --legacy-peer-deps
-
-      - name: Build docs
-        run: npm run typedoc
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./docs
+          github-token: ${{ secrets.GITHUB_TOKEN }}
