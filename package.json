@@ -1,6 +1,6 @@
 {
   "name": "fastify-hl7",
-  "version": "3.3.0",
+  "version": "4.0.0",
   "description": "A Fastify HL7 Plugin Developed in Pure TypeScript.",
   "type": "module",
   "module": "./dist/index.mjs",
