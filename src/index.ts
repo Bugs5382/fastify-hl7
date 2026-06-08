@@ -29,6 +29,7 @@ import Client, {
   ClientBuilderOptions,
   Connection,
   FileBatch,
+  HL7Version,
   Message,
 } from "node-hl7-client";
 import Server, {
@@ -39,7 +40,11 @@ import Server, {
 
 import type { FastifyHL7Options } from "./decorate.js";
 
-import { type DateLength, HL7Client } from "./class/hL7Client.js";
+import {
+  type DateLength,
+  HL7Client,
+  type HL7VersionBuilders,
+} from "./class/hL7Client.js";
 import { HL7Server } from "./class/hL7Server.js";
 import { errors } from "./errors.js";
 import { validateOpts as validateOptions } from "./validation.js";
@@ -142,6 +147,12 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, options) => {
       throw new errors.FASTIFY_HL7_ERR_USAGE(
         "server was not started. re-register plugin with enableServer set to true.",
       );
+    },
+    createBuilder: function <V extends HL7Version>(
+      version: V,
+      properties?: ClientBuilderOptions,
+    ): HL7VersionBuilders[V] {
+      return client.createBuilder(version, properties);
     },
     createClient: function (name, properties): Client {
       return client.createClient(name, properties);

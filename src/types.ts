@@ -29,6 +29,7 @@ import Client, {
   ClientOptions,
   Connection,
   FileBatch,
+  HL7Version,
   Message,
   OutboundHandler,
 } from "node-hl7-client";
@@ -38,7 +39,7 @@ import Server, {
   ListenerOptions,
 } from "node-hl7-server";
 
-import { DateLength } from "./class/hL7Client.js";
+import { DateLength, HL7VersionBuilders } from "./class/hL7Client.js";
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -74,6 +75,14 @@ declare module "fastify" {
     /** Close all incoming HL7 ports.
      * @since 1.0.0 */
     closeServerAll: () => Promise<boolean>;
+    /** Create a version-pinned HL7 message builder.
+     * @remarks Returns the node-hl7-client builder for the given version with
+     * per-version field validation. Chain `build*` and finish with `toMessage()`.
+     * @since 4.0.0 */
+    createBuilder: <V extends HL7Version>(
+      version: V,
+      properties?: ClientBuilderOptions,
+    ) => HL7VersionBuilders[V];
     /** Create Client
      * @remarks Connecting to a remote server/broker that accepts connections.
      * @since 1.0.0 */

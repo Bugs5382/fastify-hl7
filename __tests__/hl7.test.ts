@@ -343,5 +343,51 @@ describe("plugin fastify-hl7 tests", () => {
         }
       });
     });
+
+    describe("...createBuilder (verified build)", () => {
+      beforeEach(async () => {
+        await app.register(fastifyHL7, { enableServer: false });
+      });
+
+      test("...is exposed on the decorator", async () => {
+        expect(app.hl7).toHaveProperty("createBuilder");
+      });
+
+      test("...builds a version-pinned message", async () => {
+        const message = app.hl7
+          .createBuilder("2.7")
+          .buildMSH({
+            msh_10: "MSG00001",
+            msh_11_1: "P",
+            msh_3: "MY_APP",
+            msh_4: "MY_FAC",
+            msh_5: "EPIC",
+            msh_6: "HOSP",
+            msh_9_1: "ADT",
+            msh_9_2: "A01",
+          })
+          .toMessage();
+        const raw = message.toString();
+        expect(raw).toContain("ADT");
+        expect(raw).toContain("2.7");
+      });
+
+      test("...pins the requested version into MSH.12", async () => {
+        const message = app.hl7
+          .createBuilder("2.5")
+          .buildMSH({
+            msh_10: "MSG00001",
+            msh_11_1: "P",
+            msh_3: "MY_APP",
+            msh_4: "MY_FAC",
+            msh_5: "EPIC",
+            msh_6: "HOSP",
+            msh_9_1: "ADT",
+            msh_9_2: "A01",
+          })
+          .toMessage();
+        expect(message.toString()).toContain("2.5");
+      });
+    });
   });
 });
