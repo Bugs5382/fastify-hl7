@@ -10,6 +10,10 @@
 
 - feat!: upgrade to node-hl7 v4.0.0 @Bugs5382 (#88)
 
+#### 🚀 Features
+
+- feat(api): verified message builder (createBuilder) + v4.0.0 docs @Bugs5382 (#107)
+
 #### 🧩 Dependency Updates
 
 - chore(deps-dev): bump the development-dependencies group across 1 directory with 15 updates @[dependabot[bot]](https://github.com/apps/dependabot) (#97)
