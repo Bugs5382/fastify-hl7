@@ -1,7 +1,8 @@
 name: License Check
 # Fail if a 3rd-party dependency carries a license outside the allowlist.
-# Ecosystem-aware: the npm job runs only when package.json exists, the Go job
-# only when go.mod exists. No SAST/vuln scanning (deliberately out of scope).
+# Ecosystem-aware: each job early-exits if its manifest is absent. hashFiles()
+# is NOT valid in a job-level `if` (no workspace before checkout), so the
+# manifest check lives in a step. No SAST/vuln scanning (deliberately out of scope).
 on:
   pull_request:
     branches: [main]
@@ -12,15 +13,28 @@ permissions:
 jobs:
   npm:
     name: npm dependency licenses
-    if: ${{ hashFiles('package.json') != '' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect package.json
+        id: manifest
+        run: |
+          if [ -f package.json ]; then echo "found=true" >> "$GITHUB_OUTPUT"; else echo "found=false (skipping)"; echo "found=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Setup Node
+        if: steps.manifest.outputs.found == 'true'
+        uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - run: npm install --ignore-scripts --no-audit --no-fund
-      - name: license-checker
+
+      - name: Install dependencies
+        if: steps.manifest.outputs.found == 'true'
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Check dependency licenses
+        if: steps.manifest.outputs.found == 'true'
         run: |
           npx --yes license-checker-rseidelsohn \
             --production --excludePrivatePackages \
@@ -28,14 +42,24 @@ jobs:
 
   go:
     name: Go dependency licenses
-    if: ${{ hashFiles('go.mod') != '' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect go.mod
+        id: manifest
+        run: |
+          if [ -f go.mod ]; then echo "found=true" >> "$GITHUB_OUTPUT"; else echo "found=false (skipping)"; echo "found=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Setup Go
+        if: steps.manifest.outputs.found == 'true'
+        uses: actions/setup-go@v5
         with:
           go-version: 'stable'
-      - name: go-licenses
+
+      - name: Check dependency licenses
+        if: steps.manifest.outputs.found == 'true'
         run: |
           go install github.com/google/go-licenses@latest
           "$(go env GOPATH)/bin/go-licenses" check ./... \
