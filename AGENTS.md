@@ -30,6 +30,9 @@ contract to respect:
 - **Explicit HL7 version.** The underlying libraries require an explicit HL7 version per client and
   per listener (no default). Thread it through the connection/listener options from the underlying
   library; never assume a fallback.
+- **Validated builds.** Prefer `app.hl7.createBuilder(version)` for a version-validated message
+  builder (chain `build*`, finish with `.toMessage()`); `buildMessage` is the lightweight,
+  unvalidated path.
 - **Acknowledge inbound messages** with `res.sendResponse("AA" | "AE" | "AR")`.
 - **Shutdown is automatic.** The plugin closes all clients and listeners on Fastify `preClose`; call
   `closeServer(port)` / `closeServerAll()` only to close early.

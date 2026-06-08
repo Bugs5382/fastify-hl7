@@ -30,6 +30,18 @@ import Client, {
   Connection,
   createHL7Date,
   FileBatch,
+  HL7_2_1,
+  HL7_2_2,
+  HL7_2_3,
+  HL7_2_3_1,
+  HL7_2_4,
+  HL7_2_5,
+  HL7_2_5_1,
+  HL7_2_6,
+  HL7_2_7,
+  HL7_2_7_1,
+  HL7_2_8,
+  HL7Version,
   isBatch,
   Message,
   OutboundHandler,
@@ -41,6 +53,37 @@ import { errors } from "../errors.js";
 /** Accepted HL7 date-length values, derived from node-hl7-client's
  * `createHL7Date` so it stays in sync with the upstream type. */
 export type DateLength = Parameters<typeof createHL7Date>[1];
+
+/** Maps an `HL7Version` string to the matching node-hl7-client builder class,
+ * so `createBuilder("2.7")` returns a fully typed `HL7_2_7`. */
+export interface HL7VersionBuilders {
+  "2.1": HL7_2_1;
+  "2.2": HL7_2_2;
+  "2.3": HL7_2_3;
+  "2.3.1": HL7_2_3_1;
+  "2.4": HL7_2_4;
+  "2.5": HL7_2_5;
+  "2.5.1": HL7_2_5_1;
+  "2.6": HL7_2_6;
+  "2.7": HL7_2_7;
+  "2.7.1": HL7_2_7_1;
+  "2.8": HL7_2_8;
+}
+
+/** Runtime version -> builder-class lookup backing `createBuilder`. */
+const HL7_BUILDERS = {
+  "2.1": HL7_2_1,
+  "2.2": HL7_2_2,
+  "2.3": HL7_2_3,
+  "2.3.1": HL7_2_3_1,
+  "2.4": HL7_2_4,
+  "2.5": HL7_2_5,
+  "2.5.1": HL7_2_5_1,
+  "2.6": HL7_2_6,
+  "2.7": HL7_2_7,
+  "2.7.1": HL7_2_7_1,
+  "2.8": HL7_2_8,
+} as const;
 
 export class HL7Client {
   /** @internal */
@@ -116,6 +159,33 @@ export class HL7Client {
       });
     }
     return true;
+  }
+
+  /**
+   * Create a version-pinned HL7 message builder
+   * @remarks Returns the node-hl7-client builder for the given HL7 version, with
+   * per-version field validation (withdrawn fields throw, backward-compatibility
+   * fields warn, segments not in that version are rejected). Chain `build*`
+   * methods and finish with `toMessage()`.
+   * @since 4.0.0
+   * @param version One of the supported HL7 versions ("2.1" - "2.8").
+   * @param properties Optional builder options (date format, separators, hardError).
+   * @example
+   * ```ts
+   * const message = fastify.hl7.createBuilder("2.7")
+   *   .buildMSH({ msh_9_1: "ADT", msh_9_2: "A01", msh_11_1: "P" })
+   *   .buildPID({ pid_3: "MRN12345", pid_5: "DOE^JANE^A" })
+   *   .toMessage();
+   * ```
+   */
+  createBuilder<V extends HL7Version>(
+    version: V,
+    properties?: ClientBuilderOptions,
+  ): HL7VersionBuilders[V] {
+    const Builder = HL7_BUILDERS[version] as new (
+      properties?: ClientBuilderOptions,
+    ) => HL7VersionBuilders[V];
+    return new Builder(properties);
   }
 
   /**

@@ -216,9 +216,34 @@ Reusing the same port on the same client throws — pick a distinct outbound por
 
 ### 4. Build messages, batches, and file batches
 
+For a **validated** message, use `createBuilder(version)`. It returns node-hl7-client's
+version-pinned builder, which validates every field against that HL7 version (withdrawn fields throw,
+backward-compatibility fields warn, segments not in the version are rejected) and sets `MSH.12` to
+the version for you. Chain `build*` calls and finish with `toMessage()`:
+
 ```ts
-// A single message — MSH.12 must match the sending client's version.
-const message = app.hl7.buildMessage({
+const message = app.hl7
+  .createBuilder("2.7")
+  .buildMSH({
+    msh_3: "MY_APP",
+    msh_4: "MY_FAC",
+    msh_5: "EPIC",
+    msh_6: "HOSP",
+    msh_9_1: "ADT",
+    msh_9_2: "A01",
+    msh_10: "MSG00001",
+    msh_11_1: "P",
+  })
+  .buildPID({ pid_3: "MRN12345", pid_5: "DOE^JANE^A", pid_8: "F" })
+  .toMessage();
+```
+
+Because the builder pins the version, its `MSH.12` always matches a client created with the same
+`version`. For a lightweight, **unvalidated** message, `buildMessage` constructs one directly (set
+`messageHeader.msh_12` yourself):
+
+```ts
+const quick = app.hl7.buildMessage({
   messageHeader: { msh_9_1: "ADT", msh_9_2: "A01", msh_11_1: "P", msh_12: "2.7" },
 });
 
@@ -235,10 +260,8 @@ const fileBatch = app.hl7.buildFileBatch();
 const stamp = app.hl7.buildDate(new Date(), 14);
 ```
 
-> Building takes the message/batch/builder options from `node-hl7-client`. `buildFileBatch` is for
-> *creating* a file batch — to read an existing one, use `readFile` / `readFileBuffer`
-> ([recipe 5](#5-parse-inbound-hl7-and-read-files)). For the richer class-based builder
-> (`new HL7_2_7().buildMSH(...).buildPID(...)`), see the node-hl7-client docs.
+> `buildFileBatch` is for *creating* a file batch — to read an existing one, use `readFile` /
+> `readFileBuffer` ([recipe 5](#5-parse-inbound-hl7-and-read-files)).
 
 ### 5. Parse inbound HL7 and read files
 
@@ -376,7 +399,8 @@ The server methods throw `FASTIFY_HL7_ERR_USAGE` when the plugin was registered 
 
 | Method | Returns | Description |
 |---|---|---|
-| `buildMessage(options?)` | `Message` | Build a single HL7 message (set `messageHeader.msh_12` to the client version). |
+| `createBuilder(version, options?)` | `HL7_2_x` | Version-pinned, **validated** builder; chain `build*` then `.toMessage()`. Rejects fields/segments not valid for the version. |
+| `buildMessage(options?)` | `Message` | Build a single HL7 message directly, **unvalidated** (set `messageHeader.msh_12` to the client version). |
 | `buildBatch(options?)` | `Batch` | Build an HL7 batch (BHS). |
 | `buildFileBatch(options?)` | `FileBatch` | Build an HL7 file batch (FHS) for writing. |
 | `buildDate(date, length?)` | `string` | Format a `Date` as an HL7 timestamp (length `8`, `12`, or `14`; default `14`). |
