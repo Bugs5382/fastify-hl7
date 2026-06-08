@@ -37,6 +37,11 @@ jobs:
             echo "No gh-pages branch yet -- first publish."
           fi
 
+      # Generate the lockfile BEFORE setup-node so its npm cache has something to
+      # key on and `npm ci` has a lockfile (the repo does not commit one).
+      - name: Generate lockfile
+        run: npm install --package-lock-only --ignore-scripts --legacy-peer-deps
+
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
