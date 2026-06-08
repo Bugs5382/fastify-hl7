@@ -1,9 +1,8 @@
 {
   "tsconfig": "tsconfig.json",
   "entryPoints": ["./src/api.ts"],
-  "githubPages": false,
+  "githubPages": true,
   "includeVersion": true,
-  "plugin": ["@shipgirl/typedoc-plugin-versions"],
   "out": "docs",
   "name": "Fastify HL7",
   "sidebarLinks": {
