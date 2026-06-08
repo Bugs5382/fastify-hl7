@@ -1,0 +1,21 @@
+name: Label Sync
+# Applies the canonical label set (.github/labels.yml) to the repo. Additive:
+# skip-delete keeps any extra triage labels a repo already has.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/labels.yml']
+permissions:
+  issues: write
+jobs:
+  labeler:
+    name: Sync labels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: crazy-max/ghaction-github-labeler@v5
+        with:
+          yaml-file: .github/labels.yml
+          skip-delete: true
+          dry-run: false
