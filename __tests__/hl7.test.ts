@@ -1,8 +1,31 @@
+/*
+MIT License
+
+Copyright (c) 2026 Shane Froebel
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
 import fastify, { FastifyInstance } from "fastify";
-import fs from "fs";
 import Server from "node-hl7-server";
-import path from "path";
-import { describe, expect, test, beforeEach, afterEach } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
+import { afterEach, beforeEach, describe, expect, test } from "vitest";
+
 import fastifyHL7 from "../src";
 import { errors } from "../src/errors";
 import { getCurrentDateYYYYMMDD } from "./__utils__/utils.js";
@@ -54,8 +77,8 @@ describe("plugin fastify-hl7 tests", () => {
       try {
         await app.register(fastifyHL7);
         await app.register(fastifyHL7);
-      } catch (err) {
-        expect(err).toEqual(
+      } catch (error) {
+        expect(error).toEqual(
           new errors.FASTIFY_HL7_ERR_SETUP_ERRORS("Already registered."),
         );
       }
@@ -65,8 +88,8 @@ describe("plugin fastify-hl7 tests", () => {
       await app.register(fastifyHL7);
       try {
         app.hl7.createInbound("adt/23*4&", { port: 1234 }, async () => {});
-      } catch (err) {
-        expect(err).toEqual(
+      } catch (error) {
+        expect(error).toEqual(
           new errors.FASTIFY_HL7_ERR_USAGE(
             "name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};':\"\\\\|,.<>\\/?~.",
           ),
@@ -82,8 +105,8 @@ describe("plugin fastify-hl7 tests", () => {
       test("...createInbound -- failure", async () => {
         try {
           app.hl7.createInbound("adt", { port: 1234 }, async () => {});
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "server was not started. re-register plugin with enableServer set to true.",
             ),
@@ -94,8 +117,8 @@ describe("plugin fastify-hl7 tests", () => {
       test("...closeServer -- failure", async () => {
         try {
           await app.hl7.closeServer("1234");
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "server was not started. re-register plugin with enableServer set to true.",
             ),
@@ -106,8 +129,8 @@ describe("plugin fastify-hl7 tests", () => {
       test("...closeServerAll -- failure", async () => {
         try {
           await app.hl7.closeServerAll();
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "server was not started. re-register plugin with enableServer set to true.",
             ),
@@ -118,8 +141,8 @@ describe("plugin fastify-hl7 tests", () => {
       test("...getServerByName -- failure", async () => {
         try {
           await app.hl7.getServerByName("test");
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "server was not started. re-register plugin with enableServer set to true.",
             ),
@@ -130,8 +153,8 @@ describe("plugin fastify-hl7 tests", () => {
       test("...getServerByPort -- failure", async () => {
         try {
           await app.hl7.getServerByPort("1234");
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "server was not started. re-register plugin with enableServer set to true.",
             ),
@@ -144,8 +167,8 @@ describe("plugin fastify-hl7 tests", () => {
       try {
         await app.register(fastifyHL7);
         await app.hl7.closeServer("1234");
-      } catch (err) {
-        expect(err).toEqual(
+      } catch (error) {
+        expect(error).toEqual(
           new errors.FASTIFY_HL7_ERR_USAGE(
             "No inbound server listening on port: 1234",
           ),
@@ -173,8 +196,8 @@ describe("plugin fastify-hl7 tests", () => {
       test("...createClient - name invalid characters -- failure", async () => {
         try {
           app.hl7.createClient("hello/%323", { host: "dummy.local" });
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};':\"\\\\|,.<>\\/?~.",
             ),
@@ -184,10 +207,16 @@ describe("plugin fastify-hl7 tests", () => {
 
       test("...createClient - name already used -- failure", async () => {
         try {
-          app.hl7.createClient("hello", { host: "dummy.local" });
-          app.hl7.createClient("hello", { host: "dummy.local" });
-        } catch (err) {
-          expect(err).toEqual(
+          app.hl7.createClient("hello", {
+            host: "dummy.local",
+            version: "2.7",
+          });
+          app.hl7.createClient("hello", {
+            host: "dummy.local",
+            version: "2.7",
+          });
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE("name must be unique."),
           );
         }
@@ -200,8 +229,8 @@ describe("plugin fastify-hl7 tests", () => {
             { port: 1234 },
             async () => {},
           );
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "name must not contain certain characters: `!@#$%^&*()+\\-=\\[\\]{};':\"\\\\|,.<>\\/?~.",
             ),
@@ -212,8 +241,8 @@ describe("plugin fastify-hl7 tests", () => {
       test("...createConnection - none existing -- failure", async () => {
         try {
           app.hl7.createConnection("hello", { port: 1234 }, async () => {});
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "No valid client. Improper setup of a outbound connection.",
             ),
@@ -233,7 +262,10 @@ describe("plugin fastify-hl7 tests", () => {
       });
 
       test("...getClientByName", async () => {
-        const client = app.hl7.createClient("adt", { host: "0.0.0.0" });
+        const client = app.hl7.createClient("adt", {
+          host: "0.0.0.0",
+          version: "2.7",
+        });
         const clientPullName = app.hl7.getClientByName("adt");
         expect(clientPullName).toEqual(client);
       });
@@ -259,8 +291,8 @@ describe("plugin fastify-hl7 tests", () => {
               "hl7.readFileTestMSH.20081231.hl7",
             ),
           });
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "Use readFile or readFileBuffer method. This is for building.",
             ),
@@ -278,8 +310,8 @@ describe("plugin fastify-hl7 tests", () => {
               ),
             ),
           });
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "Use readFile or readFileBuffer method. This is for building.",
             ),
@@ -290,8 +322,8 @@ describe("plugin fastify-hl7 tests", () => {
       test("...buildBatch -- must be a message type", async () => {
         try {
           app.hl7.buildBatch({ text: "BHS" });
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "Use processMessage method. This is for building.",
             ),
@@ -302,8 +334,8 @@ describe("plugin fastify-hl7 tests", () => {
       test("...buildMessage -- with text", async () => {
         try {
           app.hl7.buildMessage({ text: "MSH" });
-        } catch (err) {
-          expect(err).toEqual(
+        } catch (error) {
+          expect(error).toEqual(
             new errors.FASTIFY_HL7_ERR_USAGE(
               "Use processMessage method. This is for building.",
             ),

@@ -3,103 +3,55 @@ on:
   workflow_dispatch:
   workflow_call:
 
+# peaceiris pushes the built docs to the gh-pages branch (legacy Pages source).
 permissions:
   contents: write
-  actions: write
-  checks: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  History:
+  docs:
+    name: 📚 Publish Docs
     runs-on: ubuntu-latest
     steps:
-      - name: Get the gh-pages repo
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
+      - name: Checkout
+        uses: actions/checkout@v6
 
-      - name: Tar the existing docs
+      # Restore the previously published docs into ./docs so
+      # typedoc-plugin-versions appends this version instead of replacing the
+      # whole version history. First publish (no gh-pages yet) is a no-op.
+      - name: Restore published docs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p ./docs
-          tar -cvf documentation.tar ./docs
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git clone --branch gh-pages --depth 1 \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" .docs-prev
+            rm -rf .docs-prev/.git
+            mkdir -p docs
+            cp -a .docs-prev/. docs/
+            rm -rf .docs-prev
+          else
+            echo "No gh-pages branch yet -- first publish."
+          fi
 
-      - name: Create a document artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: documentation
-          path: documentation.tar
-
-  Build:
-    needs: History
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout src
-        uses: actions/checkout@v4
-
-      - name: Make Directory
-        run: mkdir -p ./docs
-
-      - name: Download the existing documents artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: documentation
-
-      - name: Tar Docs
-        run: tar -xf documentation.tar ./docs -C ./docs
-
-      - name: Build
-        uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v6
         with:
           node-version: lts/*
           cache: 'npm'
 
-      - name: Install NPM
-        run: npm install --ignore-scripts --force
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --legacy-peer-deps
 
-      - name: Build Documents
+      - name: Build docs
         run: npm run typedoc
-
-      - name: Tar the new docs
-        run: tar -cvf newdocumentation.tar ./docs
-
-      - name: Create a new document artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: newdocumentation
-          path: newdocumentation.tar
-
-  Commit:
-    needs: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the gh-pages repo
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-
-      - name: Checkout the gh-pages repo
-        if: env.exists == 'true'
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-
-      - name: Create Directory
-        run: mkdir -p ./docs
-
-      - name: Download the new documents artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: newdocumentation
-        continue-on-error: true
-
-      - name: Extract Tar
-        run: tar -xf newdocumentation.tar ./docs -C ./docs
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
-          allow_empty_commit: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./docs
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'

@@ -20,19 +20,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-import { FastifyHL7Options } from "./decorate.js";
+import { defineConfig } from "tsdown";
 
-/**
- * @since 1.0.0
- * @param opts
- */
-export const validateOpts = async (
-  options: FastifyHL7Options,
-): Promise<FastifyHL7Options> => {
-  // Mandatory, Defaulted
-  if (options.enableServer === undefined) {
-    options.enableServer = true;
-  }
-
-  return options;
-};
+export default defineConfig({
+  clean: true,
+  // Declarations are emitted by tsc, not rolldown's dts bundler: this package
+  // augments `fastify` (declare module "fastify"), which the bundler can't
+  // follow through fastify's own types. tsc handles the augmentation natively.
+  dts: false,
+  entry: ["src/index.ts"],
+  format: ["esm", "cjs"],
+  sourcemap: true,
+});

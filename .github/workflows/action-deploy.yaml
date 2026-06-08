@@ -33,17 +33,14 @@ jobs:
     env:
       CLEAN_TAG: ${{ needs.Strip_Version.outputs.CLEAN_TAG }}
     steps:
-      - name: Create Directory
-        run: mkdir -p ./lib
-
       - name: Download the build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
-          name: cache
+          name: dist
           path: ./
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: lts/*
           registry-url: 'https://registry.npmjs.org/'
@@ -60,11 +57,16 @@ jobs:
             echo "GIT_BRANCH_TARGET=main" >> $GITHUB_OUTPUT
           fi
 
+      # OIDC trusted publishing + provenance require npm >= 11.5.1.
+      - name: Upgrade npm
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      # No --token / NODE_AUTH_TOKEN: npm authenticates via the GitHub OIDC token
+      # matched against the trusted publisher on npmjs.com.
       - name: Publish to npm
-        uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          tag: ${{ steps.set-npm-tag.outputs.NPM_TAG }}
+        run: npm publish --provenance --access public --ignore-scripts --tag ${{ steps.set-npm-tag.outputs.NPM_TAG }}
 
   Update_Repo:
     runs-on: ubuntu-latest

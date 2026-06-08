@@ -2,36 +2,39 @@
   "name": "fastify-hl7",
   "version": "3.3.0",
   "description": "A Fastify HL7 Plugin Developed in Pure TypeScript.",
-  "module": "./lib/esm/index.js",
-  "main": "./lib/cjs/index.js",
-  "types": "./lib/types/index.d.ts",
+  "type": "module",
+  "module": "./dist/index.mjs",
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./lib/types/index.d.ts",
-      "import": "./lib/esm/index.js",
-      "require": "./lib/cjs/index.js",
-      "default": "./lib/cjs/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "files": [
-    "lib/",
+    "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=20.15.0"
   },
   "scripts": {
-    "clean": "rm -rf coverage docs lib temp",
-    "build": "tsc -p src/tsconfig.esm.json && tsc -p src/tsconfig.cjs.json && tsc -p src/tsconfig.types.json && ./bin/build-types.sh",
-    "build:watch": "tsc -p src/tsconfig.esm.json -w",
-    "build:watch:cjs": "tsc -p src/tsconfig.cjs.json -w",
-    "npm:lint": "npmPkgJsonLint .",
-    "format": "prettier --write 'README.md' 'src/**/*.ts' '__tests__/**/*.ts' '*.{mts,mjs}'",
-    "lint": "npm run npm:lint && eslint | snazzy",
-    "lint:fix": "npm run npm:lint && eslint --fix | snazzy",
-    "pack": "npm pack",
-    "prepublishOnly": "npm run clean && npm run build && npm run pack",
+    "clean": "rm -rf coverage docs dist temp",
+    "build": "tsdown && tsc --emitDeclarationOnly",
+    "build:watch": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepublishOnly": "npm run clean && npm run build",
     "test": "vitest run",
     "test:verbose": "vitest run --reporter verbose",
     "test:watch": "vitest watch",
@@ -61,39 +64,30 @@
   "dependencies": {
     "@fastify/error": "^4.1.0",
     "fastify-plugin": "^5.0.1",
-    "node-hl7-client": "^3.0.0",
-    "node-hl7-server": "^3.2.3"
+    "node-hl7-client": "^4.0.0",
+    "node-hl7-server": "^4.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.19.0",
-    "@types/eslint__js": "^8.42.3",
     "@shipgirl/typedoc-plugin-versions": "^0.3.0",
+    "@the-rabbit-hole/eslint-config": "^0.4.0",
     "@types/node": "^22.13.11",
     "@types/tcp-port-used": "^1.0.4",
-    "@typescript-eslint/eslint-plugin": "^8.27.0",
-    "@typescript-eslint/parser": "^8.27.0",
     "@vitest/coverage-v8": "^3.0.9",
     "@vitest/ui": "^3.0.9",
-    "eslint": "^9.23.0",
-    "eslint-config-prettier": "^10.1.1",
-    "eslint-plugin-prettier": "^5.2.3",
+    "eslint": "^9.39.4",
     "fastify": "^5.2.1",
     "npm-check-updates": "^17.1.14",
-    "npm-package-json-lint": "^8.0.0",
-    "npm-package-json-lint-config-default": "^7.0.1",
     "portfinder": "^1.0.35",
     "pre-commit": "^1.2.2",
-    "snazzy": "^9.0.0",
+    "prettier": "^3.8.3",
     "tcp-port-used": "^1.0.2",
-    "ts-node": "^10.9.2",
     "tsd": "^0.31.2",
+    "tsdown": "^0.22.0",
     "typedoc": "^0.28.1",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.27.0",
     "vitest": "^3.0.9"
   },
   "precommit": [
-    "format",
     "lint:fix",
     "build"
   ]

@@ -1,3 +1,25 @@
+/*
+MIT License
+
+Copyright (c) 2026 Shane Froebel
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
 import { FastifyInstance, HL7 } from "fastify";
 import fp from "fastify-plugin";
 import Client, {
@@ -5,8 +27,8 @@ import Client, {
   ClientBuilderFileOptions,
   ClientBuilderMessageOptions,
   ClientBuilderOptions,
-  FileBatch,
   Connection,
+  FileBatch,
   Message,
 } from "node-hl7-client";
 import Server, {
@@ -14,12 +36,14 @@ import Server, {
   InboundHandler,
   ListenerOptions,
 } from "node-hl7-server";
+
+import type { FastifyHL7Options } from "./decorate.js";
+
+import { type DateLength, HL7Client } from "./class/hL7Client.js";
 import { HL7Server } from "./class/hL7Server.js";
-import { HL7Client } from "./class/hL7Client.js";
-import { FastifyHL7Options } from "./decorate.js";
 import { errors } from "./errors.js";
-import { validateOpts } from "./validation.js";
-export * from "./types.js";
+import { validateOpts as validateOptions } from "./validation.js";
+export { type FastifyHL7Options } from "./decorate.js";
 
 /**
  * @since 1.0.0
@@ -29,22 +53,22 @@ export * from "./types.js";
  */
 const decorateFastifyInstance = (
   fastify: FastifyInstance,
-  _opts: FastifyHL7Options,
+  _options: FastifyHL7Options,
   connection: HL7,
 ): void => {
-  if (typeof fastify.hl7 !== "undefined") {
+  if (fastify.hl7 !== undefined) {
     throw new errors.FASTIFY_HL7_ERR_SETUP_ERRORS("Already registered.");
   }
 
-  if (typeof fastify.hl7 === "undefined") {
+  if (fastify.hl7 === undefined) {
     fastify.log.trace("[fastify-hl7] Decorate Fastify");
     fastify.decorate("hl7", connection);
   }
 };
 
-const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
-  const generatedOpts = await validateOpts(opts);
-  opts = { ...opts, ...generatedOpts };
+const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, options) => {
+  const generatedOptions = await validateOptions(options);
+  options = { ...options, ...generatedOptions };
 
   // Create server.
   // Since there can only be one server per IP address
@@ -53,13 +77,13 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
   // Clients are different as an app could talk to different servers, on many ports.
   // So we need to do something different.
   const serverInstance =
-    typeof opts.enableServer !== "undefined" && opts.enableServer
-      ? new Server(opts.serverOptions)
+    options.enableServer !== undefined && options.enableServer
+      ? new Server(options.serverOptions)
       : undefined;
 
   // Server Functions
   let server: HL7Server | undefined;
-  if (typeof serverInstance !== "undefined") {
+  if (serverInstance !== undefined) {
     // Server Functions
     server = new HL7Server(serverInstance);
 
@@ -69,7 +93,7 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
 
     // before we close fastify, make sure all server instances are closed
     fastify.addHook("preClose", async () => {
-      if (typeof server !== "undefined") {
+      if (server !== undefined) {
         await server.closeAll();
       }
     });
@@ -80,31 +104,31 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
 
   // run these before fastify closes
   fastify.addHook("preClose", async () => {
-    if (typeof client !== "undefined") {
+    if (client !== undefined) {
       await client.closeAll();
     }
   });
 
-  decorateFastifyInstance(fastify, opts, {
+  decorateFastifyInstance(fastify, options, {
     _serverInstance: serverInstance,
-    buildBatch: function (props: ClientBuilderOptions | undefined): Batch {
-      return client.buildBatch(props);
+    buildBatch: function (properties: ClientBuilderOptions | undefined): Batch {
+      return client.buildBatch(properties);
     },
-    buildDate: function (date: Date, length?: string): string {
+    buildDate: function (date: Date, length?: DateLength): string {
       return client.buildDate(date, length);
     },
     buildFileBatch: function (
-      props: ClientBuilderFileOptions | undefined,
+      properties: ClientBuilderFileOptions | undefined,
     ): FileBatch {
-      return client.buildFileBatch(props);
+      return client.buildFileBatch(properties);
     },
     buildMessage: function (
-      props: ClientBuilderMessageOptions | undefined,
+      properties: ClientBuilderMessageOptions | undefined,
     ): Message {
-      return client.buildMessage(props);
+      return client.buildMessage(properties);
     },
     closeServer: async function (port: string): Promise<boolean> {
-      if (typeof server !== "undefined") {
+      if (server !== undefined) {
         return await server.close(port);
       }
       throw new errors.FASTIFY_HL7_ERR_USAGE(
@@ -112,30 +136,30 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
       );
     },
     closeServerAll: async (): Promise<boolean> => {
-      if (typeof server !== "undefined") {
+      if (server !== undefined) {
         return await server.closeAll();
       }
       throw new errors.FASTIFY_HL7_ERR_USAGE(
         "server was not started. re-register plugin with enableServer set to true.",
       );
     },
-    createClient: function (name, props): Client {
-      return client.createClient(name, props);
+    createClient: function (name, properties): Client {
+      return client.createClient(name, properties);
+    },
+    createConnection: function (name, properties, handler) {
+      return client.createConnection(name, properties, handler);
     },
     createInbound: function (
       name: string,
-      props: ListenerOptions,
+      properties: ListenerOptions,
       handler: InboundHandler,
     ): Inbound {
-      if (typeof server !== "undefined") {
-        return server.createInbound(name, props, handler);
+      if (server !== undefined) {
+        return server.createInbound(name, properties, handler);
       }
       throw new errors.FASTIFY_HL7_ERR_USAGE(
         "server was not started. re-register plugin with enableServer set to true.",
       );
-    },
-    createConnection: function (name, props, handler) {
-      return client.createConnection(name, props, handler);
     },
     getClientByName: function (name: string): Client | undefined {
       return client.getClientByName(name);
@@ -144,7 +168,7 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
       return client.getClientConnectionByPort(port);
     },
     getServerByName: function (name: string): Inbound | undefined {
-      if (typeof server !== "undefined") {
+      if (server !== undefined) {
         return server.getServerByName(name);
       }
       throw new errors.FASTIFY_HL7_ERR_USAGE(
@@ -152,14 +176,14 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
       );
     },
     getServerByPort: function (port: string): Inbound | undefined {
-      if (typeof server !== "undefined") {
+      if (server !== undefined) {
         return server.getServerByPort(port);
       }
       throw new errors.FASTIFY_HL7_ERR_USAGE(
         "server was not started. re-register plugin with enableServer set to true.",
       );
     },
-    processHL7: function (text: string): Message | Batch {
+    processHL7: function (text: string): Batch | Message {
       return client.processHL7(text);
     },
     readFile: function (fullFilePath: string): FileBatch {
@@ -172,4 +196,5 @@ const fastifyHL7 = fp<FastifyHL7Options>(async (fastify, opts) => {
 });
 
 export default fastifyHL7;
-export { FastifyHL7Options };
+
+export * from "./types.js";
