@@ -57,10 +57,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 🔎 Detect releasable changes
+        id: releasable
+        env:
+          BODY: ${{ steps.drafter.outputs.body }}
+        run: |
+          # release-drafter's body lists the categorized PRs since the last
+          # release. With nothing to release (every change excluded, e.g.
+          # skip-changelog), it carries no PR entries -- skip the bump/changelog/
+          # commit so the manifest stays at the published version instead of
+          # drifting ahead.
+          if printf '%s' "$BODY" | grep -qE '\(#[0-9]+\)'; then
+            echo "yes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No releasable changes since the last release; skipping the prep commit."
+            echo "yes=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: 🔢 Bump Package Version
+        if: steps.releasable.outputs.yes == 'true'
         run: npm version "v${{ steps.drafter.outputs.resolved_version }}" --no-git-tag-version --allow-same-version
 
       - name: 📤 Run Changelog Action
+        if: steps.releasable.outputs.yes == 'true'
         uses: bugs5382/changelog-updater-action@v0.3.2
         with:
           tag: v${{ steps.drafter.outputs.resolved_version }}
@@ -69,6 +88,7 @@ jobs:
           diff: 'true'
 
       - name: 📤 Commit and Push Version Update
+        if: steps.releasable.outputs.yes == 'true'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore(pre-release): v${{ steps.drafter.outputs.resolved_version }} [skip ci]"
