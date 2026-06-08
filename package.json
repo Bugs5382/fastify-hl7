@@ -68,6 +68,7 @@
     "node-hl7-server": "^4.0.0"
   },
   "devDependencies": {
+    "@shipgirl/typedoc-plugin-versions": "^0.3.0",
     "@the-rabbit-hole/eslint-config": "^0.4.0",
     "@types/node": "^22.13.11",
     "@types/tcp-port-used": "^1.0.4",
