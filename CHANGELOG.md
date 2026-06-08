@@ -4,9 +4,15 @@
 
 ### What Changed 👀
 
+- fix(ci): skip PR Body check for Dependabot @Bugs5382 (#105)
+
 #### 💥 Breaking Changes
 
 - feat!: upgrade to node-hl7 v4.0.0 @Bugs5382 (#88)
+
+#### 🧩 Dependency Updates
+
+- chore(deps-dev): bump the development-dependencies group across 1 directory with 15 updates @[dependabot[bot]](https://github.com/apps/dependabot) (#97)
 
 ### Extra
 
