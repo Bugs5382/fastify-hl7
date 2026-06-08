@@ -26,6 +26,6 @@ jobs:
         run: npm install --package-lock-only --ignore-scripts --legacy-peer-deps
 
       - name: Publish versioned docs
-        uses: Bugs5382/typedoc-pages-action@v0.1.0
+        uses: Bugs5382/typedoc-pages-action@v0.1.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
