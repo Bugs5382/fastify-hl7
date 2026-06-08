@@ -1,16 +1,10 @@
 # Fastify HL7
 
-## v4.0.1 - 2026-06-08
-
-### What Changed 👀
-
-### Extra
-
-**Full Changelog**: https://github.com/Bugs5382/fastify-hl7/compare/v4.0.0...v4.0.1
-
 ## v4.0.0 - 2026-06-08
 
 ### What Changed 👀
+
+- fix(ci): skip PR Body check for Dependabot @Bugs5382 (#105)
 
 #### 💥 Breaking Changes
 
