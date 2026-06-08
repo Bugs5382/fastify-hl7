@@ -14,24 +14,10 @@ jobs:
   Test:
     uses: ./.github/workflows/action-test.yaml
 
-  Strip_Version:
-    runs-on: ubuntu-latest
-    outputs:
-      CLEAN_TAG: ${{ steps.set-output.outputs.CLEAN_TAG }}
-    steps:
-      - name: Strip "v" from Tag
-        id: set-output
-        run: echo "CLEAN_TAG=${GITHUB_EVENT_RELEASE_TAG_NAME#v}" >> $GITHUB_OUTPUT
-        env:
-          GITHUB_EVENT_RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
-
   Publish:
+    name: 🚀 Publish to npm
     runs-on: ubuntu-latest
-    outputs:
-      GIT_BRANCH_TARGET: ${{ steps.set-npm-tag.outputs.GIT_BRANCH_TARGET }}
-    needs: ['Test', 'Strip_Version']
-    env:
-      CLEAN_TAG: ${{ needs.Strip_Version.outputs.CLEAN_TAG }}
+    needs: ['Test']
     steps:
       - name: Download the build artifact
         uses: actions/download-artifact@v8
@@ -45,16 +31,17 @@ jobs:
           node-version: lts/*
           registry-url: 'https://registry.npmjs.org/'
 
-      - name: Update Version in Package.json
-        id: set-npm-tag
+      # The package.json version was already bumped on main by the Release
+      # Manager (job-version-bump). Derive the npm dist-tag from the release tag.
+      - name: Resolve npm dist-tag
+        id: npm-tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          npm version $CLEAN_TAG --no-git-tag-version
-          if [[ "$CLEAN_TAG" == *"beta"* ]]; then
-            echo "NPM_TAG=beta" >> $GITHUB_OUTPUT
-            echo "GIT_BRANCH_TARGET=develop" >> $GITHUB_OUTPUT
+          if [[ "$RELEASE_TAG" == *"beta"* ]]; then
+            echo "NPM_TAG=beta" >> "$GITHUB_OUTPUT"
           else
-            echo "NPM_TAG=latest" >> $GITHUB_OUTPUT
-            echo "GIT_BRANCH_TARGET=main" >> $GITHUB_OUTPUT
+            echo "NPM_TAG=latest" >> "$GITHUB_OUTPUT"
           fi
 
       # OIDC trusted publishing + provenance require npm >= 11.5.1.
@@ -66,45 +53,8 @@ jobs:
       # No --token / NODE_AUTH_TOKEN: npm authenticates via the GitHub OIDC token
       # matched against the trusted publisher on npmjs.com.
       - name: Publish to npm
-        run: npm publish --provenance --access public --ignore-scripts --tag ${{ steps.set-npm-tag.outputs.NPM_TAG }}
-
-  Update_Repo:
-    runs-on: ubuntu-latest
-    needs: ['Test', 'Strip_Version', 'Publish']
-    permissions:
-      contents: write
-      actions: write
-      checks: write
-    env:
-      CLEAN_TAG: ${{ needs.Strip_Version.outputs.CLEAN_TAG }}
-      GIT_BRANCH_TARGET: ${{ needs.Publish.outputs.GIT_BRANCH_TARGET }}
-    steps:
-      # - uses: hmarr/debug-action@v3
-
-      - uses: actions/checkout@v4
-        with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
-          ref: ${{ env.GIT_BRANCH_TARGET }}
-          sparse-checkout: |
-            package.json
-            CHANGELOG.md
-          sparse-checkout-cone-mode: false
-
-      - name: Update Version in Package.json
-        id: set-git-branch
-        run: npm version $CLEAN_TAG --no-git-tag-version
-
-      - name: Update Changelog
-        uses: stefanzweifel/changelog-updater-action@v1
-        with:
-          latest-version: ${{ github.event.release.name }}
-          release-notes: ${{ github.event.release.body }}
-
-      - name: Commit and Push Version Update
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "chore(release): ${{ github.event.release.tag_name }} [skip ci]"
+        run: npm publish --provenance --access public --ignore-scripts --tag ${{ steps.npm-tag.outputs.NPM_TAG }}
 
   Document:
-    needs: ['Update_Repo', 'Publish']
+    needs: ['Publish']
     uses: ./.github/workflows/action-docs.yaml

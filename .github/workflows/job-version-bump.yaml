@@ -1,0 +1,57 @@
+name: Release Manager
+# On push to main: anticipate the next version with release-drafter, bump
+# package.json to it, write it into CHANGELOG.md via the changelog action, and
+# commit that back as a [skip ci] pre-release commit. The maintainer then
+# MANUALLY publishes the GitHub Release (which creates the tag), and
+# action-deploy publishes to npm using the already-bumped package.json version.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md']
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-manager:
+    name: 🚀 Update Changelog & Prep Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Release Drafter (anticipate version)
+        id: drafter
+        uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump package.json version
+        run: npm version v${{ steps.drafter.outputs.resolved_version }} --no-git-tag-version
+
+      - name: Update CHANGELOG.md
+        uses: bugs5382/changelog-updater-action@v0.3.2
+        env:
+          LOG_LEVEL: debug
+          LOG_FORMAT: text
+        with:
+          tag: v${{ steps.drafter.outputs.resolved_version }}
+          notes: ${{ steps.drafter.outputs.body }}
+          path: .
+          diff: 'true'
+
+      - name: Commit and push changelog
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore(pre-release): v${{ steps.drafter.outputs.resolved_version }} [skip ci]"
