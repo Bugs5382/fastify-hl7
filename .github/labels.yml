@@ -1,6 +1,6 @@
-# Canonical label set for every Bugs5382 repo. Applied by job-label-sync.yaml
-# (additive: skip-delete keeps a repo's extra triage labels). Aligned to the
-# release-drafter categories + version-resolver and the conventional-commit
+# Canonical label set for every Bugs5382 repo. job-label-sync.yaml reconciles a
+# repo to exactly this set (it also deletes labels not listed here). Aligned to
+# the release-drafter categories + version-resolver and the conventional-commit
 # prefixes the autolabeler maps from PR titles.
 - name: breaking
   color: "b60205"
