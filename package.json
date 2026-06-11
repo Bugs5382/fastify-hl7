@@ -70,7 +70,7 @@
   "devDependencies": {
     "@shipgirl/typedoc-plugin-versions": "^0.3.2",
     "@the-rabbit-hole/eslint-config": "^0.4.0",
-    "@types/node": "^25.9.2",
+    "@types/node": "^25.9.3",
     "@types/tcp-port-used": "^1.0.4",
     "@vitest/coverage-v8": "^4.1.8",
     "@vitest/ui": "^4.1.8",
@@ -79,7 +79,7 @@
     "npm-check-updates": "^22.2.3",
     "portfinder": "^1.0.38",
     "pre-commit": "^2.0.0",
-    "prettier": "^3.8.3",
+    "prettier": "^3.8.4",
     "tcp-port-used": "^1.0.3",
     "tsd": "^0.33.0",
     "tsdown": "^0.22.2",
