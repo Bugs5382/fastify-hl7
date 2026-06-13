@@ -39,6 +39,7 @@ contribution from the outside.
    8. [TLS and server options](#8-tls-and-server-options)
    9. [Look up live clients and listeners](#9-look-up-live-clients-and-listeners)
    10. [Error handling when the server is disabled](#10-error-handling-when-the-server-is-disabled)
+   11. [Encapsulate sending in your own plugin](#11-encapsulate-sending-in-your-own-plugin)
 4. [API Reference](#-api-reference-fastifyhl7)
 5. [Plugin Options](#-plugin-options)
 6. [External Libraries](#-external-libraries)
@@ -368,6 +369,152 @@ try {
 ```
 
 Registering the plugin twice also throws (`FASTIFY_HL7_ERR_SETUP_ERRORS: "Already registered."`).
+
+### 11. Encapsulate sending in your own plugin
+
+This is the pattern the plugin is built for, and the reason it is a plugin at all. Fastify's
+encapsulation lets you keep every HL7 concern — registering `fastify-hl7`, the version pin, the
+client, the outbound connection, and the ACK handling — in **one plugin**, and expose just a small,
+intent-named surface (a decorator like `app.adt`) to the rest of the app. Routes then send a message
+in one call; they never touch clients, connections, or message headers.
+
+Wrap your plugin with [`fastify-plugin`](https://github.com/fastify/fastify-plugin) so the decorator
+is visible to sibling plugins and routes. Without `fp`, the decorator would be trapped inside this
+plugin's own encapsulation context and the rest of the app could not see it.
+
+The helper below builds a **validated** `ADT^A01` with `createBuilder("2.7")`, sends it over a
+connection created once at startup, and resolves with the remote's acknowledgement code (`MSA.1`):
+
+```ts
+// plugins/adt.ts
+import fp from "fastify-plugin";
+import fastifyHL7 from "fastify-hl7";
+
+// The HL7 version is pinned in one place. The client, the connection, and the
+// builder all use it, so MSH.12 can never drift out of sync.
+const HL7_VERSION = "2.7" as const;
+
+// A small, route-facing input — the business shape, not an HL7 message.
+interface Patient {
+  mrn: string;
+  name: string; // HL7 XPN, e.g. "DOE^JANE^A"
+  sex?: string; // HL7 administrative sex, e.g. "F"
+}
+
+declare module "fastify" {
+  interface FastifyInstance {
+    adt: {
+      /** Send an ADT^A01 (patient admit) and resolve with the ACK code from MSA.1. */
+      sendA01: (patient: Patient) => Promise<string>;
+    };
+  }
+}
+
+export default fp(
+  async (app) => {
+    // 1. Register fastify-hl7. This app only sends, so the inbound server is off.
+    await app.register(fastifyHL7, { enableServer: false });
+
+    // 2. Wire the client and one outbound connection once, at startup. The ACK
+    //    handler resolves a pending promise so the helper can await the reply.
+    const host = process.env.ADT_HOST ?? "127.0.0.1";
+    const port = Number(process.env.ADT_PORT ?? 3001);
+
+    app.hl7.createClient("adt_host", { host, version: HL7_VERSION });
+
+    let resolveAck: ((code: string) => void) | undefined;
+    const connection = app.hl7.createConnection(
+      "adt_host",
+      { port, version: HL7_VERSION },
+      async (res) => {
+        // The remote replies with an ACK/NAK message; MSA.1 carries the code.
+        const code = res.getMessage().get("MSA.1").toString();
+        resolveAck?.(code);
+      },
+    );
+
+    // 3. Expose one intent-named helper. Routes call app.adt.sendA01(patient)
+    //    and stay ignorant of HL7 framing, the connection, and the version.
+    app.decorate("adt", {
+      sendA01: async (patient: Patient): Promise<string> => {
+        const message = app.hl7
+          .createBuilder(HL7_VERSION)
+          .buildMSH({
+            msh_3: "MY_APP",
+            msh_4: "MY_FAC",
+            msh_5: "EPIC",
+            msh_6: "HOSP",
+            msh_9_1: "ADT",
+            msh_9_2: "A01",
+            msh_10: app.hl7.buildDate(new Date()),
+            msh_11_1: "P",
+          })
+          .buildEVN({ evn_1: "A01", evn_2: new Date() })
+          .buildPID({ pid_3: patient.mrn, pid_5: patient.name, pid_8: patient.sex })
+          .buildPV1({ pv1_2: "I" }) // patient class: I = inpatient
+          .toMessage();
+
+        const ack = new Promise<string>((resolve) => {
+          resolveAck = resolve;
+        });
+        await connection.sendMessage(message);
+        return ack;
+      },
+    });
+
+    // 4. No teardown to write: fastify-hl7 registers preClose hooks that close
+    //    the client and connection automatically when the app shuts down.
+  },
+  { name: "adt" },
+);
+```
+
+> The ACK handler above resolves a single pending promise, which keeps the example focused on the
+> encapsulation pattern. The handler is per-connection and is not correlated to a specific outgoing
+> message, so if you send several messages concurrently over the same connection you should match each
+> reply to its request yourself — e.g. key pending promises by the `MSH.10` message-control id you set
+> on the outgoing message and read back from the ACK's `MSA.2`.
+
+Register it once, then admit a patient from anywhere with a single call:
+
+```ts
+import fastify from "fastify";
+import adt from "./plugins/adt";
+
+const app = fastify();
+await app.register(adt);
+
+app.post("/admit", async (request) => {
+  const ackCode = await app.adt.sendA01(request.body as never);
+  return { accepted: ackCode === "AA", ackCode };
+});
+
+await app.listen({ port: 3000 });
+```
+
+Why this shape works well:
+
+- **One place owns HL7.** Registration, version pin, client, connection, and message building live
+  together; the rest of the app depends only on `app.adt`.
+- **Startup wires, routes send.** The client and connection are created once at boot, so the first
+  request does not rebuild the connection or re-pin the version.
+- **The version cannot drift.** `HL7_VERSION` feeds `createClient` and `createBuilder`, and the
+  builder stamps it into `MSH.12` — so the message a client sends always matches the version that
+  client was created with.
+- **Lifecycle is handled for you.** `fastify-hl7`'s `preClose` hooks close the client and connection
+  with the app (see [Graceful shutdown](#7-graceful-shutdown)) — important for clean restarts and for
+  tests that start and stop Fastify repeatedly.
+- **Swappable.** Because routes only know `app.adt`, you can repoint the host, add a second trigger
+  (`sendA08`, an `ORU` result via [recipe 4](#4-build-messages-batches-and-file-batches)), or stub the
+  decorator in a test without touching route code.
+
+> **Registration order:** register your wrapper plugin (which registers `fastify-hl7` internally)
+> before any plugin or route that uses `app.adt`. Because the wrapper is an `fp` plugin, Fastify
+> guarantees its decorators are in place before sibling plugins and routes load.
+>
+> The types you need — `HL7`, `FastifyHL7Options`, and the client/server option types — are described
+> in the [API Reference](#-api-reference-fastifyhl7); the underlying message, segment, and builder
+> types come from `node-hl7-client` (see [External Libraries](#-external-libraries)).
 
 ## 📖 API Reference (`fastify.hl7`)
 
