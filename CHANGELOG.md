@@ -1,10 +1,14 @@
 # Fastify HL7
 
-## v4.0.1 - 2026-06-13
+## v4.0.1 - 2026-06-14
 
 ### What Changed 👀
 
 - ci: Release Manager commits as the owner, not github-actions[bot] @Bugs5382 (#127)
+
+#### 📄 Documentation
+
+- docs: add encapsulation recipe for a user plugin that streamlines sending HL7 @Bugs5382 (#128)
 
 #### 🧩 Dependency Updates
 
