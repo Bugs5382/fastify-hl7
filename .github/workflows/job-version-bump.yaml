@@ -80,7 +80,7 @@ jobs:
 
       - name: 📤 Run Changelog Action
         if: steps.releasable.outputs.yes == 'true'
-        uses: bugs5382/changelog-updater-action@v0.3.2
+        uses: bugs5382/changelog-updater-action@v0.4.0
         with:
           tag: v${{ steps.drafter.outputs.resolved_version }}
           notes: ${{ steps.drafter.outputs.body }}
