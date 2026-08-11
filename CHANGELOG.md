@@ -1,10 +1,12 @@
 # Fastify HL7
 
-## v4.0.1 - 2026-06-20
+## v4.0.1 - 2026-08-11
 
 ### What Changed 👀
 
-- ci: Release Manager commits as the owner, not github-actions[bot] @Bugs5382 (#127)
+#### 🐛 Bug Fixes
+
+- fix(deps): raise the node-hl7 floor to 4.1.1 @Bugs5382 (#136)
 
 #### 📄 Documentation
 
