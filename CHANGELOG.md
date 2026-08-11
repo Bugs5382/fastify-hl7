@@ -10,6 +10,7 @@
 
 #### 📄 Documentation
 
+- docs(changelog): put every release in the release-drafter format @Bugs5382 (#138)
 - docs: add encapsulation recipe for a user plugin that streamlines sending HL7 @Bugs5382 (#128)
 
 #### 🧩 Dependency Updates
