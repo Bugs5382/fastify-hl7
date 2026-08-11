@@ -64,8 +64,8 @@
   "dependencies": {
     "@fastify/error": "^4.2.0",
     "fastify-plugin": "^6.0.0",
-    "node-hl7-client": "^4.0.0",
-    "node-hl7-server": "^4.0.0"
+    "node-hl7-client": "^4.1.1",
+    "node-hl7-server": "^4.1.1"
   },
   "devDependencies": {
     "@shipgirl/typedoc-plugin-versions": "^0.3.2",
