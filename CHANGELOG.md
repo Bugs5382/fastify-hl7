@@ -4,6 +4,10 @@
 
 ### What Changed 👀
 
+#### 🐛 Bug Fixes
+
+- fix(build): keep source maps out of the npm package and guard its size @Bugs5382 (#144)
+
 #### 📄 Documentation
 
 - docs(readme): apply the lite emoji treatment @Bugs5382 (#141)
