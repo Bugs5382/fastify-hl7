@@ -22,8 +22,9 @@ OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 import { FastifyInstance, HL7 } from "fastify";
 import fp from "fastify-plugin";
-import Client, {
+import {
   Batch,
+  Client,
   ClientBuilderFileOptions,
   ClientBuilderMessageOptions,
   ClientBuilderOptions,
@@ -32,10 +33,11 @@ import Client, {
   HL7Version,
   Message,
 } from "node-hl7-client";
-import Server, {
+import {
   Inbound,
   InboundHandler,
   ListenerOptions,
+  Server,
 } from "node-hl7-server";
 
 import type { FastifyHL7Options } from "./decorate.js";
