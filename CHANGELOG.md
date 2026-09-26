@@ -6,6 +6,7 @@
 
 #### 🐛 Bug Fixes
 
+- fix: use named node-hl7 imports so the CommonJS build works @Bugs5382 (#146)
 - fix(build): keep source maps out of the npm package and guard its size @Bugs5382 (#144)
 
 #### 📄 Documentation
