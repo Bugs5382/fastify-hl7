@@ -53,7 +53,11 @@ contract to respect:
 
 ## Build, test, lint
 
-- Build: `npm run build` (emits to `lib/` as ESM + CJS + types).
+- Build: `npm run build` (tsdown emits ESM + CJS to `dist/`; types via `tsc --emitDeclarationOnly`;
+  no source maps).
+- Package check: `npm run check:pack` after a build. It fails if `npm pack --dry-run` would ship a
+  `.map` file, TypeScript source, test files or a non-runtime folder, has no `dist/` output, or goes
+  over the 250 kB unpacked ceiling set in `scripts/checkPack.mjs` (CI runs it in `action-test`).
 - Test: `npm test` (vitest, single run) or `npm run test:watch`.
 - Lint: `npm run lint` (eslint + npm-package-json-lint); `npm run lint:fix` to autofix.
 - Docs: `npm run typedoc`.
@@ -63,6 +67,8 @@ contract to respect:
 - The underlying `node-hl7` libraries require an explicit HL7 version per client and per listener
   (there is no default). Always thread an explicit version through the plugin API; never
   reintroduce a hardcoded version fallback.
+- Keep the `node-hl7-client` and `node-hl7-server` ranges at `^4.1.1`. Client 4.0.0 and 4.1.0 were
+  published at about 44 MB unpacked; never widen the range to allow them, and do not exact-pin.
 - The plugin is the only public entry point. Construct HL7 objects through the decorated API, not
   by importing the underlying libraries directly in app code.
 - See `CLAUDE.md` for branch/commit/PR rules; these are enforced by the git hooks in `.claude/hooks`.
