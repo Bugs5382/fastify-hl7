@@ -1,6 +1,7 @@
-# 🏥 Fastify HL7
+# Fastify HL7 🏥
 
-A Fastify HL7 plugin developed in pure TypeScript.
+> 🩺 A Fastify HL7 plugin developed in pure TypeScript.
+
 It wraps the `node-hl7-client` and `node-hl7-server` packages — both shipped from the
 [`node-hl7`](https://github.com/Bugs5382/node-hl7) repo — so a Fastify app can send and
 receive HL7 v2.x messages over MLLP.
@@ -21,7 +22,7 @@ contribution from the outside.
 > "2.7.1" | "2.8"`. There is no default. A client's `version` must match the `MSH.12` of every
 > message it sends; an inbound listener rejects (`AR`) any message whose `MSH.12` differs.
 
-## Table of Contents
+## 📑 Table of Contents
 
 1. [Install](#-install)
 2. [Basic Usage](#-basic-usage)
