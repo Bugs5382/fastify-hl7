@@ -43,6 +43,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Fails if the tarball would ship source maps, source or test paths, no
+      # dist/, or goes over the unpacked-size ceiling in scripts/checkPack.mjs.
+      - name: Check package contents
+        run: npm run check:pack
+
       # The published set is whatever package.json `files` lists (dist for an app,
       # lib for a library) plus the fixed metadata. Derived, never hardcoded.
       - name: Resolve published files

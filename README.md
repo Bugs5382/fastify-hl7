@@ -55,6 +55,11 @@ npm install fastify-hl7
 
 Requires Node.js ≥ 22.
 
+The plugin depends on `node-hl7-client` and `node-hl7-server` `^4.1.1`, so a fresh install pulls
+4.1.1 or newer of both. Versions 4.0.0 and 4.1.0 of `node-hl7-client` were published oversized
+(about 44 MB unpacked), so 4.1.1 or newer is required. If an older lockfile or an `overrides`
+entry pins either package below 4.1.1, update it.
+
 ## 🚀 Basic Usage
 
 ### Register the plugin

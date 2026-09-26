@@ -31,6 +31,7 @@
     "clean": "rm -rf coverage docs dist temp",
     "build": "tsdown && tsc --emitDeclarationOnly",
     "build:watch": "tsdown --watch",
+    "check:pack": "node scripts/checkPack.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
