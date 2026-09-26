@@ -1,5 +1,17 @@
 # Fastify HL7
 
+## v4.0.2 - 2026-09-26
+
+### What Changed 👀
+
+#### 📄 Documentation
+
+- docs(readme): apply the lite emoji treatment @Bugs5382 (#141)
+
+### Extra
+
+**Full Changelog**: https://github.com/Bugs5382/fastify-hl7/compare/v4.0.1...v4.0.2
+
 ## v4.0.1 - 2026-08-11
 
 ### What Changed 👀
