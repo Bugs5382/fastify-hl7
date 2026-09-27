@@ -72,3 +72,4 @@ contract to respect:
 - The plugin is the only public entry point. Construct HL7 objects through the decorated API, not
   by importing the underlying libraries directly in app code.
 - See `CLAUDE.md` for branch/commit/PR rules; these are enforced by the git hooks in `.claude/hooks`.
+- Open every PR as a draft. CI skips drafts, so run the full checks locally, push once they pass, and mark the PR ready when the work is finished; see CLAUDE.md "CI and Actions minutes".
