@@ -1,5 +1,17 @@
 # Fastify HL7
 
+## v4.0.3 - 2026-11-01
+
+### What Changed 👀
+
+#### 🐛 Bug Fixes
+
+- fix(ci): read npm pack output from npm 12 in the pack checks @Bugs5382 (#155)
+
+### Extra
+
+**Full Changelog**: https://github.com/Bugs5382/fastify-hl7/compare/v4.0.2...v4.0.3
+
 ## v4.0.2 - 2026-09-26
 
 ### What Changed 👀
