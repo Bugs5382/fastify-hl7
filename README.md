@@ -155,10 +155,14 @@ const app = fastify();
 await app.register(fastifyHL7);
 
 // Inbound: accept everything, echo back an "AA".
-app.hl7.createInbound("ib_adt", { port: 3001, version: "2.7" }, async (req, res) => {
-  app.log.info("inbound %s", req.getType());
-  await res.sendResponse("AA");
-});
+app.hl7.createInbound(
+  "ib_adt",
+  { port: 3001, version: "2.7" },
+  async (req, res) => {
+    app.log.info("inbound %s", req.getType());
+    await res.sendResponse("AA");
+  },
+);
 
 // Outbound: a client pointed at our own listener, same version.
 app.hl7.createClient("self", { host: "127.0.0.1", version: "2.7" });
@@ -169,7 +173,12 @@ const out = app.hl7.createConnection("self", { port: 3001 }, async (res) => {
 await app.listen({ port: 3000 });
 
 const message = app.hl7.buildMessage({
-  messageHeader: { msh_9_1: "ADT", msh_9_2: "A01", msh_11_1: "P", msh_12: "2.7" },
+  messageHeader: {
+    msh_9_1: "ADT",
+    msh_9_2: "A01",
+    msh_11_1: "P",
+    msh_12: "2.7",
+  },
 });
 await out.sendMessage(message);
 ```
@@ -180,20 +189,28 @@ One server hosts many inbound listeners on different ports — for example, one 
 its own version:
 
 ```ts
-app.hl7.createInbound("adt_feed", { port: 3001, version: "2.7" }, async (req, res) => {
-  // ADT (admit/discharge/transfer) feed.
-  await res.sendResponse("AA");
-});
-
-app.hl7.createInbound("oru_feed", { port: 3002, version: "2.7" }, async (req, res) => {
-  // ORU (observation result) feed; branch on the message type.
-  if (req.getType() === "ORU") {
-    // ...persist the result...
+app.hl7.createInbound(
+  "adt_feed",
+  { port: 3001, version: "2.7" },
+  async (req, res) => {
+    // ADT (admit/discharge/transfer) feed.
     await res.sendResponse("AA");
-  } else {
-    await res.sendResponse("AR"); // reject anything unexpected on this port
-  }
-});
+  },
+);
+
+app.hl7.createInbound(
+  "oru_feed",
+  { port: 3002, version: "2.7" },
+  async (req, res) => {
+    // ORU (observation result) feed; branch on the message type.
+    if (req.getType() === "ORU") {
+      // ...persist the result...
+      await res.sendResponse("AA");
+    } else {
+      await res.sendResponse("AR"); // reject anything unexpected on this port
+    }
+  },
+);
 ```
 
 > There is only **one** server per host (the machine this runs on), but it can host any number of
@@ -208,13 +225,30 @@ its version), and one connection per port on that host:
 app.hl7.createClient("lab", { host: "10.0.0.10", version: "2.5.1" });
 app.hl7.createClient("pharmacy", { host: "10.0.0.20", version: "2.7" });
 
-const labOrders = app.hl7.createConnection("lab", { port: 6661 }, async () => {});
-const labResults = app.hl7.createConnection("lab", { port: 6662 }, async () => {});
-const rxOrders = app.hl7.createConnection("pharmacy", { port: 6661 }, async () => {});
+const labOrders = app.hl7.createConnection(
+  "lab",
+  { port: 6661 },
+  async () => {},
+);
+const labResults = app.hl7.createConnection(
+  "lab",
+  { port: 6662 },
+  async () => {},
+);
+const rxOrders = app.hl7.createConnection(
+  "pharmacy",
+  { port: 6661 },
+  async () => {},
+);
 
 await labOrders.sendMessage(
   app.hl7.buildMessage({
-    messageHeader: { msh_9_1: "ORM", msh_9_2: "O01", msh_11_1: "P", msh_12: "2.5.1" },
+    messageHeader: {
+      msh_9_1: "ORM",
+      msh_9_2: "O01",
+      msh_11_1: "P",
+      msh_12: "2.5.1",
+    },
   }),
 );
 ```
@@ -251,7 +285,12 @@ Because the builder pins the version, its `MSH.12` always matches a client creat
 
 ```ts
 const quick = app.hl7.buildMessage({
-  messageHeader: { msh_9_1: "ADT", msh_9_2: "A01", msh_11_1: "P", msh_12: "2.7" },
+  messageHeader: {
+    msh_9_1: "ADT",
+    msh_9_2: "A01",
+    msh_11_1: "P",
+    msh_12: "2.7",
+  },
 });
 
 // A batch (BHS) that groups several messages.
@@ -267,7 +306,7 @@ const fileBatch = app.hl7.buildFileBatch();
 const stamp = app.hl7.buildDate(new Date(), 14);
 ```
 
-> `buildFileBatch` is for *creating* a file batch — to read an existing one, use `readFile` /
+> `buildFileBatch` is for _creating_ a file batch — to read an existing one, use `readFile` /
 > `readFileBuffer` ([recipe 5](#5-parse-inbound-hl7-and-read-files)).
 
 ### 5. Parse inbound HL7 and read files
@@ -281,7 +320,9 @@ const fromPath = app.hl7.readFile("temp/hl7.readTestBHS.20231208.hl7");
 
 // Or from a Buffer you already have in memory.
 import { readFileSync } from "node:fs";
-const fromBuffer = app.hl7.readFileBuffer(readFileSync("temp/hl7.readTestBHS.20231208.hl7"));
+const fromBuffer = app.hl7.readFileBuffer(
+  readFileSync("temp/hl7.readTestBHS.20231208.hl7"),
+);
 ```
 
 ### 6. ACK / NAK responses
@@ -289,16 +330,20 @@ const fromBuffer = app.hl7.readFileBuffer(readFileSync("temp/hl7.readTestBHS.202
 Inside an inbound handler, reply with the acknowledgement code that fits the outcome:
 
 ```ts
-app.hl7.createInbound("ib_adt", { port: 3001, version: "2.7" }, async (req, res) => {
-  try {
-    const message = req.getMessage();
-    // ...process the message...
-    await res.sendResponse("AA"); // Application Accept
-  } catch (err) {
-    req.log?.error(err);
-    await res.sendResponse("AE"); // Application Error
-  }
-});
+app.hl7.createInbound(
+  "ib_adt",
+  { port: 3001, version: "2.7" },
+  async (req, res) => {
+    try {
+      const message = req.getMessage();
+      // ...process the message...
+      await res.sendResponse("AA"); // Application Accept
+    } catch (err) {
+      req.log?.error(err);
+      await res.sendResponse("AE"); // Application Error
+    }
+  },
+);
 ```
 
 Use `"AR"` (Application Reject) for messages you will not process at all (wrong type, unsupported
@@ -350,11 +395,11 @@ Client-side TLS is set per client via the `tls` option on `createClient`
 Retrieve handles you created earlier, by name or by port:
 
 ```ts
-const labClient = app.hl7.getClientByName("lab");           // Client | undefined
-const conn = app.hl7.getClientConnectionByPort("6661");     // Connection | undefined
+const labClient = app.hl7.getClientByName("lab"); // Client | undefined
+const conn = app.hl7.getClientConnectionByPort("6661"); // Connection | undefined
 
-const adtListener = app.hl7.getServerByName("adt_feed");    // Inbound | undefined
-const onPort = app.hl7.getServerByPort("3001");             // Inbound | undefined
+const adtListener = app.hl7.getServerByName("adt_feed"); // Inbound | undefined
+const onPort = app.hl7.getServerByPort("3001"); // Inbound | undefined
 ```
 
 ### 10. Error handling when the server is disabled
@@ -456,7 +501,11 @@ export default fp(
             msh_11_1: "P",
           })
           .buildEVN({ evn_1: "A01", evn_2: new Date() })
-          .buildPID({ pid_3: patient.mrn, pid_5: patient.name, pid_8: patient.sex })
+          .buildPID({
+            pid_3: patient.mrn,
+            pid_5: patient.name,
+            pid_8: patient.sex,
+          })
           .buildPV1({ pv1_2: "I" }) // patient class: I = inpatient
           .toMessage();
 
@@ -528,43 +577,43 @@ All methods hang off the `hl7` decorator on the Fastify instance.
 
 ### Inbound / server
 
-| Method | Returns | Description |
-|---|---|---|
-| `createInbound(name, options, handler)` | `Inbound` | Start an inbound listener on `options.port` pinned to `options.version`; `handler(req, res)` handles each message. |
-| `closeServer(port)` | `Promise<boolean>` | Close the listener on `port`. |
-| `closeServerAll()` | `Promise<boolean>` | Close all listeners. |
-| `getServerByName(name)` | `Inbound \| undefined` | Look up a listener by name. |
-| `getServerByPort(port)` | `Inbound \| undefined` | Look up a listener by port. |
+| Method                                  | Returns                | Description                                                                                                        |
+| --------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `createInbound(name, options, handler)` | `Inbound`              | Start an inbound listener on `options.port` pinned to `options.version`; `handler(req, res)` handles each message. |
+| `closeServer(port)`                     | `Promise<boolean>`     | Close the listener on `port`.                                                                                      |
+| `closeServerAll()`                      | `Promise<boolean>`     | Close all listeners.                                                                                               |
+| `getServerByName(name)`                 | `Inbound \| undefined` | Look up a listener by name.                                                                                        |
+| `getServerByPort(port)`                 | `Inbound \| undefined` | Look up a listener by port.                                                                                        |
 
 The server methods throw `FASTIFY_HL7_ERR_USAGE` when the plugin was registered with
 `enableServer: false`.
 
 ### Outbound / client
 
-| Method | Returns | Description |
-|---|---|---|
-| `createClient(name, options)` | `Client` | Register a uniquely named client pointed at `options.host` and pinned to `options.version`. |
-| `createConnection(name, options, handler)` | `Connection` | Attach an outbound connection (on `options.port`) to the client called `name`; `handler(res)` handles the reply. |
-| `getClientByName(name)` | `Client \| undefined` | Look up a client by name. |
-| `getClientConnectionByPort(port)` | `Connection \| undefined` | Look up an outbound connection by port. |
+| Method                                     | Returns                   | Description                                                                                                      |
+| ------------------------------------------ | ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `createClient(name, options)`              | `Client`                  | Register a uniquely named client pointed at `options.host` and pinned to `options.version`.                      |
+| `createConnection(name, options, handler)` | `Connection`              | Attach an outbound connection (on `options.port`) to the client called `name`; `handler(res)` handles the reply. |
+| `getClientByName(name)`                    | `Client \| undefined`     | Look up a client by name.                                                                                        |
+| `getClientConnectionByPort(port)`          | `Connection \| undefined` | Look up an outbound connection by port.                                                                          |
 
 ### Builders
 
-| Method | Returns | Description |
-|---|---|---|
-| `createBuilder(version, options?)` | `HL7_2_x` | Version-pinned, **validated** builder; chain `build*` then `.toMessage()`. Rejects fields/segments not valid for the version. |
-| `buildMessage(options?)` | `Message` | Build a single HL7 message directly, **unvalidated** (set `messageHeader.msh_12` to the client version). |
-| `buildBatch(options?)` | `Batch` | Build an HL7 batch (BHS). |
-| `buildFileBatch(options?)` | `FileBatch` | Build an HL7 file batch (FHS) for writing. |
-| `buildDate(date, length?)` | `string` | Format a `Date` as an HL7 timestamp (length `8`, `12`, or `14`; default `14`). |
+| Method                             | Returns     | Description                                                                                                                   |
+| ---------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `createBuilder(version, options?)` | `HL7_2_x`   | Version-pinned, **validated** builder; chain `build*` then `.toMessage()`. Rejects fields/segments not valid for the version. |
+| `buildMessage(options?)`           | `Message`   | Build a single HL7 message directly, **unvalidated** (set `messageHeader.msh_12` to the client version).                      |
+| `buildBatch(options?)`             | `Batch`     | Build an HL7 batch (BHS).                                                                                                     |
+| `buildFileBatch(options?)`         | `FileBatch` | Build an HL7 file batch (FHS) for writing.                                                                                    |
+| `buildDate(date, length?)`         | `string`    | Format a `Date` as an HL7 timestamp (length `8`, `12`, or `14`; default `14`).                                                |
 
 ### Parsing & files
 
-| Method | Returns | Description |
-|---|---|---|
-| `processHL7(text)` | `Batch \| Message` | Parse raw HL7 — `Batch` if it starts with BHS, else `Message`. |
-| `readFile(fullFilePath)` | `FileBatch` | Read a file batch from a path. |
-| `readFileBuffer(buffer)` | `FileBatch` | Read a file batch from a `Buffer`. |
+| Method                   | Returns            | Description                                                    |
+| ------------------------ | ------------------ | -------------------------------------------------------------- |
+| `processHL7(text)`       | `Batch \| Message` | Parse raw HL7 — `Batch` if it starts with BHS, else `Message`. |
+| `readFile(fullFilePath)` | `FileBatch`        | Read a file batch from a path.                                 |
+| `readFileBuffer(buffer)` | `FileBatch`        | Read a file batch from a `Buffer`.                             |
 
 ## ⚙️ Plugin Options
 
