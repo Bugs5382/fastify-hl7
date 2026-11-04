@@ -59,7 +59,7 @@ contract to respect:
   `.map` file, TypeScript source, test files or a non-runtime folder, has no `dist/` output, or goes
   over the 250 kB unpacked ceiling set in `scripts/checkPack.mjs` (CI runs it in `action-test`).
 - Test: `npm test` (vitest, single run) or `npm run test:watch`.
-- Lint: `npm run lint` (eslint + npm-package-json-lint); `npm run lint:fix` to autofix.
+- Lint: `npm run lint` (oxlint + npm-package-json-lint); `npm run lint:fix` to autofix.
 - Docs: `npm run typedoc`.
 
 ## Conventions and gotchas
